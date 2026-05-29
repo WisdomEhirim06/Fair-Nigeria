@@ -1,0 +1,30 @@
+{
+  "name": "fair-nigeria",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fair Nigeria (Fair27) - citizen-led electoral transparency platform for the 2027 Nigerian election.",
+  "type": "module",
+  "workspaces": [
+    "fn-backend",
+    "fn-frontend"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev:backend": "npm run dev --workspace fn-backend",
+    "build:backend": "npm run build --workspace fn-backend"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.11.0"
+  }
+}
