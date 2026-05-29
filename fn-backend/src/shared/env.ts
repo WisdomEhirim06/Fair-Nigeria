@@ -1,0 +1,48 @@
+import { config } from 'dotenv';
+import { z } from 'zod';
+
+// Load .env into process.env before validation.
+config();
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  PORT: z.coerce.number().int().positive().default(3000),
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+    .default('info'),
+  CORS_ORIGINS: z.string().optional(),
+
+  
+  DATABASE_URL: z.string().url(),
+  AUTH_DATABASE_URL: z.string().url(),
+
+  REDIS_URL: z.string().url().optional(),
+
+  JWT_PRIVATE_KEY: z.string().optional(),
+  JWT_PUBLIC_KEY: z.string().optional(),
+
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET_NAME: z.string().optional(),
+
+  FCM_SERVICE_ACCOUNT_B64: z.string().optional(),
+
+  OTP_SMS_API_KEY: z.string().optional(),
+
+  FLAG_THRESHOLD: z.coerce.number().int().positive().default(5),
+});
+
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  // Logger depends on env, so fall back to console here.
+  console.error(
+    'Invalid environment variables:\n',
+    JSON.stringify(parsed.error.flatten().fieldErrors, null, 2),
+  );
+  process.exit(1);
+}
+
+export const env = parsed.data;
+export type Env = typeof env;
