@@ -1,0 +1,6 @@
+{
+  "name": "fn-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fair Nigeria frontend (React PWA). Scaffolded in a later sprint; placeholder so the monorepo workspace resolves."
+}
