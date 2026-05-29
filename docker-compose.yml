@@ -1,0 +1,27 @@
+#   docker compose up -d        # start Redis in the background
+#   docker compose down         # stop and remove containers (data volume persists)
+#   docker compose down -v      # stop and wipe the Redis volume (clean slate)
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: fn_redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --save 60 1
+      --loglevel notice
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  redis_data:
+    driver: local

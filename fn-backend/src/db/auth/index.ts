@@ -1,0 +1,20 @@
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+
+import { env } from '../../shared/env';
+import * as schema from './schema';
+
+/**
+ * Drizzle client for the auth database (fn_auth).
+
+ * Uses the auth_user role — intentionally isolated from the main app database.
+ */
+const client = postgres(env.AUTH_DATABASE_URL, {
+  ssl: env.NODE_ENV === 'production' ? 'require' : false,
+  max: 5,
+  idle_timeout: 30,
+  connect_timeout: 10,
+});
+
+export const authDb = drizzle(client, { schema });
+export type AuthDb = typeof authDb;
