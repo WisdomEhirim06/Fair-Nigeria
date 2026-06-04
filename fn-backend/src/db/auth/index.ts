@@ -18,3 +18,6 @@ const client = postgres(env.AUTH_DATABASE_URL, {
 
 export const authDb = drizzle(client, { schema });
 export type AuthDb = typeof authDb;
+
+/** Close the fn_auth connection pool during graceful shutdown. */
+export const closeAuthDb = (): Promise<void> => client.end();

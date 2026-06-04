@@ -14,3 +14,6 @@ const client = postgres(env.DATABASE_URL, {
 
 export const appDb = drizzle(client, { schema });
 export type AppDb = typeof appDb;
+
+/** Close the fn_app connection pool during graceful shutdown. */
+export const closeAppDb = (): Promise<void> => client.end();
