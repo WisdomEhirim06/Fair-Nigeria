@@ -12,6 +12,10 @@ const envSchema = z.object({
     .default('info'),
   CORS_ORIGINS: z.string().optional(),
 
+  // Whether to serve the Swagger UI / OpenAPI spec. When unset, docs are served
+  // outside production only.
+  ENABLE_API_DOCS: z.enum(['true', 'false']).optional(),
+
   
   DATABASE_URL: z.string().url(),
   AUTH_DATABASE_URL: z.string().url(),

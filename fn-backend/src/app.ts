@@ -5,6 +5,7 @@ import { logger } from './shared/logger';
 import { successEnvelope } from './shared/response';
 import { errorHandler } from './shared/middleware/error-handler';
 import { notFound } from './shared/middleware/not-found';
+import { mountDocs } from './shared/openapi';
 import { apiRouter } from './routes';
 
 
@@ -30,6 +31,10 @@ export function createApp(): Express {
     const requestId = req.id as unknown as string;
     res.json(successEnvelope({ status: 'ok', uptime: process.uptime() }, requestId));
   });
+
+  // Interactive API docs (/docs) and raw spec (/docs.json). Off in production
+  // unless ENABLE_API_DOCS=true.
+  mountDocs(app);
 
   app.use('/api/v1', apiRouter);
 
