@@ -6,6 +6,7 @@ export const ERROR_CODES = {
   FORBIDDEN: { http: 403, code: 'FORBIDDEN' },
   NOT_FOUND: { http: 404, code: 'NOT_FOUND' },
   DUPLICATE_NIN: { http: 409, code: 'DUPLICATE_NIN' },
+  DUPLICATE_PHONE: { http: 409, code: 'DUPLICATE_PHONE' },
   ALREADY_RATED: { http: 409, code: 'ALREADY_RATED' },
   ALREADY_SUBMITTED: { http: 409, code: 'ALREADY_SUBMITTED' },
   FILE_TOO_LARGE: { http: 413, code: 'FILE_TOO_LARGE' },
