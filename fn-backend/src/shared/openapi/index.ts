@@ -10,10 +10,6 @@ export function docsEnabled(): boolean {
   return env.ENABLE_API_DOCS ? env.ENABLE_API_DOCS === 'true' : env.NODE_ENV !== 'production';
 }
 
-/**
- * Mount Swagger UI at `/docs` and the raw OpenAPI JSON at `/docs.json`.
- * No-op when docs are disabled (e.g. production without ENABLE_API_DOCS=true).
- */
 export function mountDocs(app: Express): void {
   if (!docsEnabled()) return;
 

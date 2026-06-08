@@ -8,12 +8,6 @@ type OpenApiDocument = ReturnType<OpenApiGeneratorV3['generateDocument']>;
 
 let cached: OpenApiDocument | undefined;
 
-/**
- * Build (and memoize) the OpenAPI 3.0 document from everything registered on the
- * shared registry. The server URL is `/` and paths are absolute (e.g.
- * `/api/v1/auth/register`) so both the root health check and the versioned API
- * are documented in one spec.
- */
 export function buildOpenApiDocument(): OpenApiDocument {
   if (cached) return cached;
 
@@ -24,7 +18,7 @@ export function buildOpenApiDocument(): OpenApiDocument {
       title: 'Fair Nigeria API',
       version: 'v1',
       description:
-        'Citizen-led electoral transparency API. OTP-based auth (no passwords), ' +
+        'Citizen-led electoral transparency API. OTP-based auth, ' +
         'client-side NIN hashing, append-only records, and a 2-of-3 transcription ' +
         'consensus engine.',
     },

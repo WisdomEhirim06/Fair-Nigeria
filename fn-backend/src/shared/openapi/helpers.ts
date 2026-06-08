@@ -2,10 +2,6 @@ import { z } from 'zod';
 
 import { errorEnvelopeSchema, metaSchema } from './registry';
 
-/**
- * Wrap a data schema in the standard success envelope so a documented response
- * matches exactly what `successEnvelope(...)` produces at runtime.
- */
 export function successEnvelopeSchema<T extends z.ZodTypeAny>(data: T): z.ZodTypeAny {
   return z.object({
     success: z.literal(true),
@@ -30,12 +26,6 @@ export function jsonError(description: string) {
   };
 }
 
-/**
- * The error responses common to most endpoints. Spread into a `responses` map
- * and add the success entry plus any endpoint-specific codes:
- *
- *   responses: { 200: jsonOk(Schema, '...'), ...commonErrors() }
- */
 export function commonErrors() {
   return {
     400: jsonError('Validation failed.'),

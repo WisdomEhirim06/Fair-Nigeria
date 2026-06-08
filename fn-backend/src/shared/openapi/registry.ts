@@ -5,12 +5,6 @@ import { z } from 'zod';
 // module is the single import point for the registry and is loaded first.
 extendZodWithOpenApi(z);
 
-/**
- * The one shared OpenAPI registry. Every module documents its endpoints by
- * calling `registry.registerPath(...)`, co-located with its route definitions,
- * so the spec is generated from the same Zod schemas used for runtime validation
- * and can never drift out of sync.
- */
 export const registry = new OpenAPIRegistry();
 
 /** Bearer JWT auth, referenced by any endpoint guarded with `requireAuth`. */

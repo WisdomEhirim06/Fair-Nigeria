@@ -32,8 +32,6 @@ export function createApp(): Express {
     res.json(successEnvelope({ status: 'ok', uptime: process.uptime() }, requestId));
   });
 
-  // Interactive API docs (/docs) and raw spec (/docs.json). Off in production
-  // unless ENABLE_API_DOCS=true.
   mountDocs(app);
 
   app.use('/api/v1', apiRouter);
