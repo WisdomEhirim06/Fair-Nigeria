@@ -2,7 +2,7 @@ import type { RequestHandler } from 'express';
 
 import { successEnvelope } from '../../shared/response';
 import type { RegisterInput } from './auth.schemas';
-import { registerCitizen, toPublicUser } from './auth.service';
+import { getUserById, registerCitizen, toPublicUser } from './auth.service';
 import type { RefreshInput, RequestOtpInput, VerifyOtpInput } from './otp.schemas';
 import {
   requestOtp,
@@ -51,6 +51,18 @@ export const refreshHandler: RequestHandler = async (req, res, next) => {
     const tokens = await rotateRefreshToken((req.body as RefreshInput).refreshToken);
     const requestId = req.id as unknown as string;
     res.json(successEnvelope(tokens, requestId));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** GET /auth/me — return the authenticated user's public profile. */
+export const getMeHandler: RequestHandler = async (req, res, next) => {
+  try {
+    // req.user is guaranteed by requireAuth — the non-null assertion is safe here.
+    const user = await getUserById(req.user!.id);
+    const requestId = req.id as unknown as string;
+    res.json(successEnvelope(user, requestId));
   } catch (err) {
     next(err);
   }

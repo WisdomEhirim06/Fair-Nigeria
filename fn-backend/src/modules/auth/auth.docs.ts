@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { commonErrors, jsonError, jsonOk } from '../../shared/openapi/helpers';
+import { authErrors, commonErrors, jsonError, jsonOk } from '../../shared/openapi/helpers';
 import { registry } from '../../shared/openapi/registry';
 import { publicUserSchema, registerBodySchema } from './auth.schemas';
 import {
@@ -125,6 +125,24 @@ registry.registerPath({
   request: { body: { required: true, content: { 'application/json': { schema: RefreshRequest } } } },
   responses: {
     200: jsonOk(z.object({ message: z.string() }), 'Logged out.'),
+    ...commonErrors(),
+  },
+});
+
+// Me — authenticated profile
+registry.registerPath({
+  method: 'get',
+  path: '/api/v1/auth/me',
+  tags: ['Auth'],
+  summary: 'Get current user profile',
+  description:
+    'Returns the authenticated user\'s public profile. ' +
+    'Never exposes ninHash or fcmToken. ' +
+    'Requires a valid Bearer access token.',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    200: jsonOk(PublicUser, 'Authenticated user profile.'),
+    ...authErrors(),
     ...commonErrors(),
   },
 });

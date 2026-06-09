@@ -1,7 +1,9 @@
 import { Router } from 'express';
 
+import { requireAuth } from '../../shared/middleware/require-auth';
 import { validate } from '../../shared/middleware/validate';
 import {
+  getMeHandler,
   logoutHandler,
   refreshHandler,
   register,
@@ -24,6 +26,9 @@ authRouter.post('/request-otp', validate(requestOtpBodySchema), requestOtpHandle
 authRouter.post('/verify-otp', validate(verifyOtpBodySchema), verifyOtpHandler);
 authRouter.post('/refresh', validate(refreshBodySchema), refreshHandler);
 authRouter.post('/logout', validate(refreshBodySchema), logoutHandler);
+
+// Authenticated profile — requires a valid Bearer token
+authRouter.get('/me', requireAuth, getMeHandler);
 
 /**
  * User management (Sprint 2, Super Admin only): provision officials/transcribers,

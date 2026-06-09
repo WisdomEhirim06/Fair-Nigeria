@@ -1,8 +1,29 @@
+import { eq, and } from 'drizzle-orm';
+
 import { authDb } from '../../db';
 import { users, type User } from '../../db/auth/schema';
 import { isUniqueViolation } from '../../shared/db-errors';
 import { AppError } from '../../shared/errors';
 import type { PublicUser, RegisterInput } from './auth.schemas';
+
+/**
+ * Fetch the profile of an active user by ID.
+ * Used by GET /auth/me — never returns ninHash or fcmToken.
+ * Throws UNAUTHORIZED (not NOT_FOUND) to avoid leaking whether an ID exists.
+ */
+export async function getUserById(id: string): Promise<PublicUser> {
+  const [user] = await authDb
+    .select()
+    .from(users)
+    .where(and(eq(users.id, id), eq(users.isActive, true)))
+    .limit(1);
+
+  if (!user) {
+    throw new AppError('UNAUTHORIZED', 'Account not found or inactive.');
+  }
+
+  return toPublicUser(user);
+}
 
 export function toPublicUser(user: User): PublicUser {
   return {
