@@ -10,8 +10,11 @@ export const logger = pino({
           target: 'pino-pretty',
           options: {
             colorize: true,
-            translateTime: 'SYS:standard',
-            ignore: 'pid,hostname',
+            translateTime: 'SYS:HH:MM:ss',
+            ignore: 'pid,hostname,req,res',
+            singleLine: true,
+            errorLikeObjectKeys: ['err'],
+            errorProps: 'message,code',
           },
         },
       }

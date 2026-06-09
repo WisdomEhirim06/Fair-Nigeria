@@ -12,8 +12,23 @@ export function getRedis(): Redis {
       lazyConnect: true,
       maxRetriesPerRequest: 2,
       enableReadyCheck: true,
+      // Back off reconnect attempts so a downed Redis doesn't spin the logs.
+      retryStrategy: (times) => Math.min(times * 1000, 30_000),
     });
-    client.on('error', (err) => logger.error({ err }, 'Redis client error'));
+
+    // Log connection errors compactly, and only once per outage — ioredis fires
+    // the 'error' event on every retry, which would otherwise flood the console.
+    let errorLogged = false;
+    client.on('error', (err: NodeJS.ErrnoException) => {
+      if (!errorLogged) {
+        logger.error(`Redis connection error: ${err.code ?? err.message}`);
+        errorLogged = true;
+      }
+    });
+    client.on('ready', () => {
+      errorLogged = false;
+      logger.info('Redis connected');
+    });
   }
   return client;
 }
