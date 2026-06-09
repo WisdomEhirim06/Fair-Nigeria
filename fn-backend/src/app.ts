@@ -22,6 +22,17 @@ export function createApp(): Express {
         res.setHeader('X-Request-Id', id);
         return id;
       },
+      
+      customSuccessMessage: (req, res, responseTime) =>
+        `${req.method} ${req.url} ${res.statusCode} ${responseTime}ms`,
+      customErrorMessage: (req, res, _err) =>
+        `${req.method} ${req.url} ${res.statusCode}`,
+      // Colour the line by outcome: 5xx → error, 4xx → warn, else info.
+      customLogLevel: (_req, res, err) => {
+        if (res.statusCode >= 500 || err) return 'error';
+        if (res.statusCode >= 400) return 'warn';
+        return 'info';
+      },
     }),
   );
 

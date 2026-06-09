@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { authErrors, commonErrors, jsonError, jsonOk } from '../../shared/openapi/helpers';
+import { commonErrors, jsonError, jsonOk } from '../../shared/openapi/helpers';
 import { registry } from '../../shared/openapi/registry';
 import { publicUserSchema, registerBodySchema } from './auth.schemas';
 import {

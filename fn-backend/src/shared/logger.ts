@@ -11,7 +11,7 @@ export const logger = pino({
           options: {
             colorize: true,
             translateTime: 'SYS:HH:MM:ss',
-            ignore: 'pid,hostname,req,res',
+            ignore: 'pid,hostname,req,res,responseTime,reqId',
             singleLine: true,
             errorLikeObjectKeys: ['err'],
             errorProps: 'message,code',

@@ -24,9 +24,9 @@ export function buildOpenApiDocument(): OpenApiDocument {
     },
     servers: [{ url: '/', description: 'Same origin' }],
     tags: [
-      { name: 'System', description: 'Health and operational endpoints.' },
-      { name: 'Auth', description: 'Registration, OTP login, JWT issuance and refresh.' },
-      { name: 'Users', description: 'Super-admin user management.' },
+      { name: 'System', description: 'Health and Operational Endpoints.' },
+      { name: 'Auth', description: 'Citizen Registration, OTP Login, JWT Issuance and Refresh.' },
+      { name: 'Users', description: 'Super-admin User Management.' },
     ],
   });
 

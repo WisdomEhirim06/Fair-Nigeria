@@ -1,5 +1,5 @@
 import { timingSafeEqual as cryptoTimingSafeEqual } from 'node:crypto';
-import { eq, and, isNull, gt } from 'drizzle-orm';
+import { eq, and, isNull, gt, sql } from 'drizzle-orm';
 
 import { authDb } from '../../db';
 import { otpRecords, refreshTokens, users } from '../../db/auth/schema';
@@ -91,12 +91,17 @@ export async function verifyOtpAndIssueTokens(input: VerifyOtpInput): Promise<To
     throw new AppError('UNAUTHORIZED', 'OTP has expired or was already used.');
   }
 
-  // Increment attempt counter. Reject if over threshold regardless of match.
-  const attempts = record.attempts + 1;
-  await authDb
+  // Atomically increment the attempt counter in the database and read back the
+  // new value. Doing the increment in SQL (rather than record.attempts + 1 in JS)
+  // is race-safe: concurrent verify requests can't both read the same old value
+  
+  const [updated] = await authDb
     .update(otpRecords)
-    .set({ attempts })
-    .where(eq(otpRecords.id, record.id));
+    .set({ attempts: sql`${otpRecords.attempts} + 1` })
+    .where(eq(otpRecords.id, record.id))
+    .returning({ attempts: otpRecords.attempts });
+
+  const attempts = updated?.attempts ?? record.attempts + 1;
 
   if (attempts > MAX_OTP_ATTEMPTS) {
     // Invalidate Redis key to force a fresh OTP request.
@@ -133,39 +138,41 @@ export async function rotateRefreshToken(rawToken: string): Promise<TokenPair> {
   const tokenHash = sha256Hex(rawToken);
   const now = new Date();
 
-  const [record] = await authDb
-    .select()
-    .from(refreshTokens)
-    .where(
-      and(
-        eq(refreshTokens.tokenHash, tokenHash),
-        isNull(refreshTokens.revokedAt),
-        gt(refreshTokens.expiresAt, now),
-      ),
-    )
-    .limit(1);
+  return authDb.transaction(async (tx) => {
+    const [record] = await tx
+      .select()
+      .from(refreshTokens)
+      .where(
+        and(
+          eq(refreshTokens.tokenHash, tokenHash),
+          isNull(refreshTokens.revokedAt),
+          gt(refreshTokens.expiresAt, now),
+        ),
+      )
+      .limit(1);
 
-  if (!record) {
-    throw new AppError('UNAUTHORIZED', 'Refresh token is invalid, expired, or already used.');
-  }
+    if (!record) {
+      throw new AppError('UNAUTHORIZED', 'Refresh token is invalid, expired, or already used.');
+    }
 
-  // Revoke the old token immediately before issuing a new one.
-  await authDb
-    .update(refreshTokens)
-    .set({ revokedAt: now })
-    .where(eq(refreshTokens.id, record.id));
+    // Revoke the old token immediately before issuing a new one.
+    await tx
+      .update(refreshTokens)
+      .set({ revokedAt: now })
+      .where(eq(refreshTokens.id, record.id));
 
-  const [user] = await authDb
-    .select()
-    .from(users)
-    .where(and(eq(users.id, record.userId), eq(users.isActive, true)))
-    .limit(1);
+    const [user] = await tx
+      .select()
+      .from(users)
+      .where(and(eq(users.id, record.userId), eq(users.isActive, true)))
+      .limit(1);
 
-  if (!user) {
-    throw new AppError('UNAUTHORIZED', 'Account not found or inactive.');
-  }
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Account not found or inactive.');
+    }
 
-  return issueTokenPair(user.id, user.role);
+    return issueTokenPair(user.id, user.role, tx);
+  });
 }
 
 /**
@@ -183,14 +190,22 @@ export async function revokeRefreshToken(rawToken: string): Promise<void> {
 }
 
 
-async function issueTokenPair(userId: string, role: string): Promise<TokenPair> {
-  const accessToken = await signAccessToken({ sub: userId, role: role as import('../../shared/validation').Role });
+
+async function issueTokenPair(
+  userId: string,
+  role: string,
+  db: Pick<typeof authDb, 'insert'> = authDb,
+): Promise<TokenPair> {
+  const accessToken = await signAccessToken({
+    sub: userId,
+    role: role as import('../../shared/validation').Role,
+  });
 
   const rawRefresh = generateOpaqueToken(32);
   const tokenHash = sha256Hex(rawRefresh);
   const expiresAt = new Date(Date.now() + REFRESH_TTL_DAYS * 24 * 60 * 60 * 1000);
 
-  await authDb.insert(refreshTokens).values({ userId, tokenHash, expiresAt });
+  await db.insert(refreshTokens).values({ userId, tokenHash, expiresAt });
 
   return {
     accessToken,
