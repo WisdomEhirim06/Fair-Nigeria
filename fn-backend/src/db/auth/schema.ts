@@ -2,6 +2,7 @@ import {
   boolean,
   char,
   index,
+  integer,
   pgEnum,
   pgTable,
   smallint,
@@ -76,6 +77,33 @@ export const refreshTokens = pgTable(
   ],
 );
 
+/**
+ * Codeword invites used to self-provision Yiaga officials and transcribers.
+ * A super admin mints a code carrying a role + geographic assignment; anyone who
+ * registers with the code inherits that role/state/zone. The plaintext codeword is
+ * never stored — only its SHA-256 hash. `maxUses` caps redemptions; `expiresAt`
+ * time-boxes the window; `isActive` lets an admin revoke a leaked code immediately.
+ */
+export const inviteCodes = pgTable('invite_codes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  // SHA-256 hex of the normalized codeword. Unique so the same phrase can't be minted twice.
+  codeHash: char('code_hash', { length: 64 }).notNull().unique(),
+  // Only provisionable roles are ever stored here: yiaga_official | yiaga_transcriber.
+  role: userRole('role').notNull(),
+  // Geographic assignment inherited by anyone redeeming the code (feeds consensus routing).
+  state: varchar('state', { length: 60 }),
+  geopoliticalZone: varchar('geopolitical_zone', { length: 4 }),
+  maxUses: integer('max_uses').notNull(),
+  usedCount: integer('used_count').notNull().default(0),
+  // False = revoked. Row is preserved for the audit trail, never deleted.
+  isActive: boolean('is_active').notNull().default(true),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 // Inferred row types for use across the auth module.
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -83,3 +111,5 @@ export type OtpRecord = typeof otpRecords.$inferSelect;
 export type NewOtpRecord = typeof otpRecords.$inferInsert;
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 export type NewRefreshToken = typeof refreshTokens.$inferInsert;
+export type InviteCode = typeof inviteCodes.$inferSelect;
+export type NewInviteCode = typeof inviteCodes.$inferInsert;

@@ -15,10 +15,12 @@ export const phoneNumberSchema = z
   .string()
   .regex(/^\+234\d{10}$/, 'Must be a Nigerian phone number in +234XXXXXXXXXX format');
 
-/** SHA-256 hex digest of the NIN, computed on the client. 64 hex characters. */
+/** SHA-256 hex digest of the NIN, computed on the client. 64 hex characters.
+ *  Normalized to lowercase so case variants of the same hash can't bypass the UNIQUE constraint. */
 export const ninHashSchema = z
   .string()
-  .regex(/^[a-fA-F0-9]{64}$/, 'Must be a 64-character SHA-256 hex hash');
+  .regex(/^[a-fA-F0-9]{64}$/, 'Must be a 64-character SHA-256 hex hash')
+  .transform((s) => s.toLowerCase());
 
 /** A 6-digit OTP code. */
 export const otpCodeSchema = z.string().regex(/^\d{6}$/, 'OTP must be exactly 6 digits');
@@ -27,6 +29,12 @@ export const uuidSchema = z.string().uuid('Must be a valid UUID');
 
 export const roleSchema = z.enum(ROLES);
 export const geopoliticalZoneSchema = z.enum(GEOPOLITICAL_ZONES);
+
+/** Roles a super admin can provision via invite codes. Citizens self-register;
+ *  super_admin is bootstrapped via seed, never minted through a code. */
+export const PROVISIONABLE_ROLES = ['yiaga_official', 'yiaga_transcriber'] as const;
+export const provisionableRoleSchema = z.enum(PROVISIONABLE_ROLES);
+export type ProvisionableRole = (typeof PROVISIONABLE_ROLES)[number];
 
 /** Standard pagination query. Coerces string query params to numbers with safe bounds. */
 export const paginationQuerySchema = z.object({

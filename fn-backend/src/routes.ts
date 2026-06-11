@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { authRouter, usersRouter } from './modules/auth/auth.routes';
+import { authRouter } from './modules/auth/auth.routes';
+import { inviteCodesRouter, usersRouter } from './modules/admin/admin.routes';
 import { electionsRouter } from './modules/elections/elections.routes';
 import { articlesRouter } from './modules/content/content.routes';
 import { geographyRouter } from './modules/geography/geography.routes';
@@ -14,6 +15,7 @@ export const apiRouter = Router();
 
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', usersRouter);
+apiRouter.use('/invite-codes', inviteCodesRouter);
 apiRouter.use('/elections', electionsRouter);
 apiRouter.use('/articles', articlesRouter);
 apiRouter.use('/geography', geographyRouter);

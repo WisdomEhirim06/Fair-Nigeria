@@ -12,6 +12,10 @@ const envSchema = z.object({
     .default('info'),
   CORS_ORIGINS: z.string().optional(),
 
+  // Whether to serve the Swagger UI / OpenAPI spec. When unset, docs are served
+  // outside production only.
+  ENABLE_API_DOCS: z.enum(['true', 'false']).optional(),
+
   
   DATABASE_URL: z.string().url(),
   AUTH_DATABASE_URL: z.string().url(),
@@ -31,6 +35,16 @@ const envSchema = z.object({
   OTP_SMS_API_KEY: z.string().optional(),
 
   FLAG_THRESHOLD: z.coerce.number().int().positive().default(5),
+
+  // Rate limiting
+  RATE_LIMIT_GLOBAL_MAX: z.coerce.number().int().positive().default(100),
+  RATE_LIMIT_GLOBAL_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
+  RATE_LIMIT_OTP_MAX: z.coerce.number().int().positive().default(10),
+  RATE_LIMIT_OTP_WINDOW_MS: z.coerce.number().int().positive().default(3_600_000),
+
+  // Number of proxy hops to trust for client IP resolution (Cloudflare → Railway).
+  // Default to 0 (don't trust X-Forwarded-For) unless explicitly configured for a known proxy setup.
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
 });
 
 const parsed = envSchema.safeParse(process.env);
