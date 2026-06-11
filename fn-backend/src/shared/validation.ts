@@ -30,6 +30,12 @@ export const uuidSchema = z.string().uuid('Must be a valid UUID');
 export const roleSchema = z.enum(ROLES);
 export const geopoliticalZoneSchema = z.enum(GEOPOLITICAL_ZONES);
 
+/** Roles a super admin can provision via invite codes. Citizens self-register;
+ *  super_admin is bootstrapped via seed, never minted through a code. */
+export const PROVISIONABLE_ROLES = ['yiaga_official', 'yiaga_transcriber'] as const;
+export const provisionableRoleSchema = z.enum(PROVISIONABLE_ROLES);
+export type ProvisionableRole = (typeof PROVISIONABLE_ROLES)[number];
+
 /** Standard pagination query. Coerces string query params to numbers with safe bounds. */
 export const paginationQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

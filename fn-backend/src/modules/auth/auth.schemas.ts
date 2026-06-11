@@ -17,6 +17,10 @@ export const registerBodySchema = z
     ninHash: ninHashSchema,
     state: z.string().trim().min(2).max(60).optional(),
     geopoliticalZone: geopoliticalZoneSchema.optional(),
+    // Optional codeword. When present, the account inherits the role + geographic
+    // assignment encoded in the code (Yiaga official/transcriber self-provisioning).
+    // When absent, the account is a plain citizen.
+    inviteCode: z.string().trim().min(1).max(120).optional(),
   })
   .strict();
 

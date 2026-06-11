@@ -26,7 +26,7 @@ export function buildOpenApiDocument(): OpenApiDocument {
     tags: [
       { name: 'System', description: 'Health and Operational Endpoints.' },
       { name: 'Auth', description: 'Citizen Registration, OTP Login, JWT Issuance and Refresh.' },
-      { name: 'Users', description: 'Super-admin User Management.' },
+      { name: 'Admin', description: 'Super-admin: invite codewords and user management.' },
     ],
   });
 

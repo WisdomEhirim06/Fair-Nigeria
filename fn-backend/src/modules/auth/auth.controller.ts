@@ -2,7 +2,7 @@ import type { RequestHandler } from 'express';
 
 import { successEnvelope } from '../../shared/response';
 import type { RegisterInput } from './auth.schemas';
-import { getUserById, registerCitizen, toPublicUser } from './auth.service';
+import { getUserById, registerUser, toPublicUser } from './auth.service';
 import type { RefreshInput, RequestOtpInput, VerifyOtpInput } from './otp.schemas';
 import {
   requestOtp,
@@ -14,7 +14,7 @@ import {
 /** POST /auth/register — create a citizen account from a client-side NIN hash. */
 export const register: RequestHandler = async (req, res, next) => {
   try {
-    const user = await registerCitizen(req.body as RegisterInput);
+    const user = await registerUser(req.body as RegisterInput);
     const requestId = req.id as unknown as string;
     res.status(201).json(successEnvelope(toPublicUser(user), requestId));
   } catch (err) {

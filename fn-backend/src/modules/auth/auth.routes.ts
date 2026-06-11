@@ -29,10 +29,3 @@ authRouter.post('/logout', validate(refreshBodySchema), logoutHandler);
 
 // Authenticated profile — requires a valid Bearer token
 authRouter.get('/me', requireAuth, getMeHandler);
-
-/**
- * User management (Sprint 2, Super Admin only): provision officials/transcribers,
- * list/view users, toggle active status, update FCM tokens.
- * Base path: /api/v1/users
- */
-export const usersRouter = Router();

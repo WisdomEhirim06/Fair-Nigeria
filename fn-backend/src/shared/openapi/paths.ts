@@ -10,6 +10,7 @@ import { registry } from './registry';
 // Module endpoint registrations (side-effect imports). Add one line per module
 // as it gains documented routes.
 import '../../modules/auth/auth.docs';
+import '../../modules/admin/admin.docs';
 
 registry.registerPath({
   method: 'get',

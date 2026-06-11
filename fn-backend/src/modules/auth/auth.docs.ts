@@ -19,6 +19,10 @@ const RegisterRequest = registry.register('RegisterRequest', registerBodySchema.
     state: 'Lagos',
     geopoliticalZone: 'SW',
   },
+  description:
+    'Citizen self-registration. Optionally include `inviteCode` (a codeword issued by ' +
+    'a super admin) to register as a Yiaga official/transcriber — the role and ' +
+    'state/zone are then taken from the code, not from the client.',
 }));
 
 const PublicUser = registry.register('PublicUser', publicUserSchema);
@@ -59,6 +63,7 @@ registry.registerPath({
   responses: {
     201: jsonOk(PublicUser, 'Account created.'),
     409: jsonError('NIN or phone number already registered.'),
+    422: jsonError('Invite code is invalid, expired, or fully used.'),
     ...commonErrors(),
   },
 });

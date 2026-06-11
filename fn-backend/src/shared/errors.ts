@@ -7,6 +7,8 @@ export const ERROR_CODES = {
   NOT_FOUND: { http: 404, code: 'NOT_FOUND' },
   DUPLICATE_NIN: { http: 409, code: 'DUPLICATE_NIN' },
   DUPLICATE_PHONE: { http: 409, code: 'DUPLICATE_PHONE' },
+  DUPLICATE_INVITE_CODE: { http: 409, code: 'DUPLICATE_INVITE_CODE' },
+  INVALID_INVITE_CODE: { http: 422, code: 'INVALID_INVITE_CODE' },
   ALREADY_RATED: { http: 409, code: 'ALREADY_RATED' },
   ALREADY_SUBMITTED: { http: 409, code: 'ALREADY_SUBMITTED' },
   FILE_TOO_LARGE: { http: 413, code: 'FILE_TOO_LARGE' },
