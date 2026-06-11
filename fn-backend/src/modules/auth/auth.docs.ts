@@ -73,10 +73,10 @@ registry.registerPath({
   method: 'post',
   path: '/api/v1/auth/request-otp',
   tags: ['Auth'],
-  summary: 'Request an OTP',
+  summary: 'Request an OTP (also serves as login)',
   description:
     'Generates a 6-digit OTP, stores its SHA-256 hash in Redis (5-min TTL), and ' +
-    'dispatches it via SMS. Always returns 200 regardless of whether the phone is ' +
+    'dispatches it via SMS. Returns 200 regardless of whether the phone is ' +
     'registered to prevent phone-number enumeration.',
   request: { body: { required: true, content: { 'application/json': { schema: RequestOtpRequest } } } },
   responses: {

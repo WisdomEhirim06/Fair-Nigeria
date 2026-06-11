@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { requireAuth } from '../../shared/middleware/require-auth';
+import { otpRateLimiter } from '../../shared/middleware/rate-limit';
 import { validate } from '../../shared/middleware/validate';
 import {
   getMeHandler,
@@ -19,8 +20,8 @@ export const authRouter = Router();
 //Registration
 authRouter.post('/register', validate(registerBodySchema), register);
 
-// OTP generation
-authRouter.post('/request-otp', validate(requestOtpBodySchema), requestOtpHandler);
+// OTP generation — rate limited per phone number (anti SMS-bombing)
+authRouter.post('/request-otp', otpRateLimiter, validate(requestOtpBodySchema), requestOtpHandler);
 
 // OTP verify tokens, refresh rotation, logout
 authRouter.post('/verify-otp', validate(verifyOtpBodySchema), verifyOtpHandler);

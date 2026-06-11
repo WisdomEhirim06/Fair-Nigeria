@@ -1,16 +1,20 @@
 import express, { type Express } from 'express';
 import { randomUUID } from 'node:crypto';
 import pinoHttp from 'pino-http';
+import { env } from './shared/env';
 import { logger } from './shared/logger';
 import { successEnvelope } from './shared/response';
 import { errorHandler } from './shared/middleware/error-handler';
 import { notFound } from './shared/middleware/not-found';
+import { globalRateLimiter } from './shared/middleware/rate-limit';
 import { mountDocs } from './shared/openapi';
 import { apiRouter } from './routes';
 
 
 export function createApp(): Express {
   const app = express();
+
+  app.set('trust proxy', env.TRUST_PROXY_HOPS);
 
   // Request logging with a generated request id, echoed back in a header so it
   // can be correlated with the `requestId` field in every response envelope.
@@ -45,7 +49,8 @@ export function createApp(): Express {
 
   mountDocs(app);
 
-  app.use('/api/v1', apiRouter);
+  // Global per-IP rate limit guards the whole API (health + docs stay unlimited).
+  app.use('/api/v1', globalRateLimiter, apiRouter);
 
   // 404 then terminal error handler (must be registered last).
   app.use(notFound);
