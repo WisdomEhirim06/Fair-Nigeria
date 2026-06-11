@@ -43,7 +43,8 @@ const envSchema = z.object({
   RATE_LIMIT_OTP_WINDOW_MS: z.coerce.number().int().positive().default(3_600_000),
 
   // Number of proxy hops to trust for client IP resolution (Cloudflare → Railway).
-  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
+  // Default to 0 (don't trust X-Forwarded-For) unless explicitly configured for a known proxy setup.
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
 });
 
 const parsed = envSchema.safeParse(process.env);
