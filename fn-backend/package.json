@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "db:generate:app": "drizzle-kit generate --config=drizzle.app.config.ts",
     "db:migrate:app": "drizzle-kit migrate --config=drizzle.app.config.ts",
+    "db:seed:app": "tsx src/db/app/seed.ts",
     "db:studio:app": "drizzle-kit studio --config=drizzle.app.config.ts",
     "db:generate:auth": "drizzle-kit generate --config=drizzle.auth.config.ts",
     "db:migrate:auth": "drizzle-kit migrate --config=drizzle.auth.config.ts",

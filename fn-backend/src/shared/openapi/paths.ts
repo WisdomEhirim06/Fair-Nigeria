@@ -6,6 +6,8 @@ import { registry } from './registry';
 import '../../modules/auth/auth.docs';
 import '../../modules/admin/admin.docs';
 import '../../modules/elections/elections.docs';
+import '../../modules/content/content.docs';
+import '../../modules/geography/geography.docs';
 
 registry.registerPath({
   method: 'get',
