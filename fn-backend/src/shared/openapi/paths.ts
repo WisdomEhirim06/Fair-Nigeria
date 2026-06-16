@@ -1,16 +1,11 @@
-/**
- * Kept separate from document.ts to avoid import cycles between the generator
- * and the modules that register paths.
- */
 import { z } from 'zod';
 
 import { jsonOk } from './helpers';
 import { registry } from './registry';
 
-// Module endpoint registrations (side-effect imports). Add one line per module
-// as it gains documented routes.
 import '../../modules/auth/auth.docs';
 import '../../modules/admin/admin.docs';
+import '../../modules/elections/elections.docs';
 
 registry.registerPath({
   method: 'get',
