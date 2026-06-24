@@ -2,5 +2,24 @@
   "name": "fn-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Fair Nigeria frontend (React PWA). Scaffolded in a later sprint; placeholder so the monorepo workspace resolves."
+  "description": "Fair Nigeria frontend (Next.js PWA) — citizen-led electoral transparency for the 2027 election.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.3"
+  }
 }

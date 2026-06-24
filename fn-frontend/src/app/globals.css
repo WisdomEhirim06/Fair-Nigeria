@@ -1,0 +1,119 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-cream: #fbfaf6;
+  --color-ink: #16271e;
+  --color-forest: #284e3f;
+  --color-forest-deep: #214034;
+  --color-lime: #6faa2e;
+  --color-lime-bright: #9ec85a;
+  --color-gold: #c7a24a;
+  --color-muted: #46594e;
+  --color-leaf: #5e8a28;
+
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-mono: var(--font-jb-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-cream);
+    background-image: radial-gradient(rgba(33, 69, 56, 0.05) 1px, transparent 1.5px);
+    background-size: 25px 25px;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-lime);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -56px;
+  z-index: 80;
+  background: var(--color-ink);
+  color: var(--color-cream);
+  padding: 10px 18px;
+  border-radius: 0 0 10px 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Nigeria dot-map — one dot per LGA, filling in on load */
+.ng-outline {
+  fill: none;
+  stroke: var(--color-forest);
+  stroke-width: 1.2;
+  opacity: 0.4;
+}
+.ng-dot {
+  fill: var(--color-lime);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dotIn 0.6s cubic-bezier(0.16, 0.7, 0.3, 1) both;
+}
+.ng-live {
+  fill: var(--color-gold);
+}
+.ng-live-ring {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 1.4;
+  opacity: 0.55;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: livePulse 1.9s ease-in-out infinite;
+}
+
+@keyframes dotIn {
+  from {
+    opacity: 0.12;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes livePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.55);
+    opacity: 0.12;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .ng-dot {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .ng-live-ring {
+    animation: none;
+  }
+}
