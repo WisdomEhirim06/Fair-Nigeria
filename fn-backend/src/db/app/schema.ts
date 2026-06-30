@@ -123,6 +123,40 @@ export const lgas = pgTable(
 );
 
 
+//  Citizen experience ratings
+//  One rating per citizen per election (UNIQUE user_id+election_id). The five
+//  criteria are fixed yes/no questions (see ratings.schemas RATING_CRITERIA).
+//  user_id has no FK — the user row lives in the isolated fn_auth database, so
+//  referential integrity is enforced at the app layer by the auth middleware.
+export const ratings = pgTable(
+  'ratings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').notNull(),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id),
+    // The LGA where the citizen voted. Unrestricted — any LGA in Nigeria.
+    lgaId: uuid('lga_id')
+      .notNull()
+      .references(() => lgas.id),
+    // Five fixed yes/no criteria. Keys mirror RATING_CRITERIA in ratings.schemas.
+    noIntimidation: boolean('no_intimidation').notNull(),
+    accreditationProper: boolean('accreditation_proper').notNull(),
+    votingOrderly: boolean('voting_orderly').notNull(),
+    securityPresent: boolean('security_present').notNull(),
+    witnessedMalpractice: boolean('witnessed_malpractice').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // One rating per citizen per election, DB-enforced.
+    uniqueIndex('ratings_user_election_idx').on(table.userId, table.electionId),
+    // Supports the dashboard aggregation: group by lga within an election.
+    index('ratings_election_lga_idx').on(table.electionId, table.lgaId),
+  ],
+);
+
+
 //  Inferred row types
 export type AuditLogRow = typeof auditLog.$inferSelect;
 export type NewAuditLog = typeof auditLog.$inferInsert;
@@ -134,3 +168,5 @@ export type State = typeof states.$inferSelect;
 export type NewState = typeof states.$inferInsert;
 export type Lga = typeof lgas.$inferSelect;
 export type NewLga = typeof lgas.$inferInsert;
+export type Rating = typeof ratings.$inferSelect;
+export type NewRating = typeof ratings.$inferInsert;

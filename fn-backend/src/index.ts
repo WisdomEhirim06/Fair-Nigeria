@@ -1,5 +1,6 @@
 import { createApp } from './app';
 import { closeAppDb, closeAuthDb } from './db';
+import { startScheduledJobs, stopScheduledJobs } from './jobs/scheduler';
 import { env } from './shared/env';
 import { logger } from './shared/logger';
 import { closeRedis } from './shared/redis';
@@ -8,10 +9,12 @@ const app = createApp();
 
 const server = app.listen(env.PORT, () => {
   logger.info(`Fair Nigeria backend listening on port ${env.PORT} (${env.NODE_ENV})`);
+  startScheduledJobs();
 });
 
 function shutdown(signal: string): void {
   logger.info(`${signal} received, shutting down gracefully...`);
+  stopScheduledJobs();
   server.close(() => {
     logger.info('HTTP server closed.');
     // Release external resources once HTTP traffic has drained.

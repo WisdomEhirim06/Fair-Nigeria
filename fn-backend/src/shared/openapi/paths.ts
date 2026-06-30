@@ -8,6 +8,8 @@ import '../../modules/admin/admin.docs';
 import '../../modules/elections/elections.docs';
 import '../../modules/content/content.docs';
 import '../../modules/geography/geography.docs';
+import '../../modules/ratings/ratings.docs';
+import '../../modules/dashboard/dashboard.docs';
 
 registry.registerPath({
   method: 'get',
