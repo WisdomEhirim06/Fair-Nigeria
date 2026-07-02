@@ -17,10 +17,6 @@ export function Hero() {
             <br />
             Then watch every vote <span className="text-lime">get counted.</span>
           </h1>
-          <p className="mt-7 max-w-[46ch] text-[clamp(1.05rem,1.4vw,1.3rem)] leading-relaxed text-muted">
-            A record any citizen can verify — civic knowledge, LGA ratings, and results you can
-            trace, sheet by sheet.
-          </p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <a
               href="#civic"

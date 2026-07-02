@@ -13,13 +13,13 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-cream/85 backdrop-blur">
-      <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-6 px-6 py-4 md:px-[clamp(1.5rem,7vw,7.5rem)]">
+      <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-6 px-6 py-5 md:px-[clamp(1.5rem,7vw,7.5rem)]">
         <a href="#top" className="flex items-center gap-2.5">
           <span className="h-3 w-3 rounded-full bg-lime" aria-hidden />
-          <span className="text-[1.15rem] font-bold tracking-tight">Fair Nigeria</span>
+          <span className="text-[1.18rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
         </a>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden flex-1 items-center justify-center gap-10 md:flex">
           {LINKS.map((l) => (
             <a
               key={l.href}
@@ -29,13 +29,14 @@ export function SiteNav() {
               {l.label}
             </a>
           ))}
-          <a
-            href="#dashboard"
-            className="rounded-full border border-ink/25 px-5 py-2 text-[0.95rem] font-semibold transition-colors hover:border-lime hover:bg-lime/10"
-          >
-            View dashboard
-          </a>
         </div>
+
+        <a
+          href="#dashboard"
+          className="hidden items-center gap-2 rounded-full bg-ink px-6 py-3 text-[0.95rem] font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-lime hover:text-ink md:inline-flex"
+        >
+          View dashboard <span aria-hidden>→</span>
+        </a>
 
         <button
           type="button"

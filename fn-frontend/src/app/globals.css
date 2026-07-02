@@ -56,6 +56,48 @@
   top: 0;
 }
 
+/* Keep anchored section headings clear of the sticky nav */
+:where(section[id], header[id]) {
+  scroll-margin-top: 88px;
+}
+
+/* Scroll-into-view reveal (paired with <Reveal />) */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(34px) scale(0.98);
+  transition:
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal][data-shown='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Staggered variant — direct children cascade in one after another */
+[data-reveal-group] > * {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal-group][data-shown='true'] > * {
+  opacity: 1;
+  transform: none;
+}
+[data-reveal-group][data-shown='true'] > *:nth-child(2) {
+  transition-delay: 0.11s;
+}
+[data-reveal-group][data-shown='true'] > *:nth-child(3) {
+  transition-delay: 0.22s;
+}
+[data-reveal-group][data-shown='true'] > *:nth-child(4) {
+  transition-delay: 0.33s;
+}
+
 /* Nigeria dot-map — one dot per LGA, filling in on load */
 .ng-outline {
   fill: none;
@@ -115,5 +157,11 @@
   }
   .ng-live-ring {
     animation: none;
+  }
+  [data-reveal],
+  [data-reveal-group] > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

@@ -8,8 +8,8 @@ export function SiteFooter() {
             <span className="text-[1.18rem] font-bold text-cream">Fair Nigeria</span>
           </div>
           <p className="max-w-[44ch] leading-relaxed text-[#8fa088]">
-            A parallel record any citizen can verify. Not a replacement for INEC — a way to compare,
-            trace, and trust.
+            A parallel record any citizen can verify. Not a replacement for INEC, just a way to
+            compare, trace, and trust.
           </p>
           <p className="mt-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-[#6f7e68]">
             An independent civic project

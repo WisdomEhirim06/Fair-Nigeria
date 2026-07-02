@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Hero } from '@/components/Hero';
+import { Reveal } from '@/components/Reveal';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteNav } from '@/components/SiteNav';
 
@@ -29,9 +30,9 @@ function Stat({ value, label }: { value: string; label: string }) {
 const SECTION_X = 'px-6 md:px-[clamp(1.5rem,7vw,7.5rem)]';
 
 const CIVIC_ARTICLES = [
-  { tag: 'Voter rights', title: 'What you’re allowed to do when you vote' },
-  { tag: 'Accreditation', title: 'How accreditation works, step by step' },
-  { tag: 'Malpractice', title: 'Spotting what shouldn’t happen on the day' },
+  { tag: 'Eligibility', title: 'How old should someone be to vote?' },
+  { tag: 'Presidential', title: 'All you need to know about the presidential elections' },
+  { tag: 'After the vote', title: 'What happens after the elections?' },
 ];
 
 const RATING_CRITERIA = [
@@ -56,77 +57,97 @@ export default function Home() {
         <Hero />
 
         {/* ── The 2023 record ───────────────────────────────── */}
-        <section id="turnout" className={`${SECTION_X} py-[clamp(6rem,14vw,12rem)]`}>
-          <Eyebrow>The 2023 record</Eyebrow>
-          <h2 className="mt-5 max-w-[18ch] text-[clamp(2.1rem,5vw,4.2rem)] font-extrabold leading-none tracking-[-0.03em]">
-            Your decision matters more than the numbers suggest.
-          </h2>
+        <Reveal>
+          <section id="turnout" className={`${SECTION_X} py-[clamp(3rem,7vw,5.5rem)]`}>
+            <Eyebrow>The 2023 record</Eyebrow>
+            <h2 className="mt-5 max-w-[18ch] text-[clamp(2.1rem,5vw,4.2rem)] font-extrabold leading-none tracking-[-0.03em]">
+              Your decision matters more than the numbers suggest.
+            </h2>
 
-          <div className="mt-[clamp(2.5rem,6vw,5rem)] flex flex-wrap items-end gap-[clamp(1.5rem,5vw,5rem)]">
-            <div className="flex items-start font-extrabold leading-[0.82] tracking-[-0.04em] text-lime">
-              <span className="text-[clamp(6rem,18vw,16rem)]">26.7</span>
-              <span className="mt-[0.18em] text-[clamp(2.4rem,6vw,5.5rem)]">%</span>
+            <div className="mt-[clamp(1.5rem,4vw,3rem)] flex flex-wrap items-end gap-[clamp(1.25rem,4vw,3.5rem)]">
+              <div className="flex items-start font-extrabold leading-[0.82] tracking-[-0.04em] text-lime">
+                <span className="text-[clamp(3.5rem,10vw,8rem)]">26.7</span>
+                <span className="mt-[0.18em] text-[clamp(1.6rem,3.5vw,3.2rem)]">%</span>
+              </div>
+              <p className="mb-2 max-w-[34ch] text-[clamp(1.05rem,1.5vw,1.4rem)] leading-snug text-muted">
+                of registered voters cast a ballot in the 2023 general election, the{' '}
+                <strong className="font-semibold text-ink">lowest turnout</strong> since the return
+                to democracy in 1999.
+              </p>
             </div>
-            <p className="mb-3 max-w-[34ch] text-[clamp(1.1rem,1.7vw,1.55rem)] leading-snug text-muted">
-              of registered voters cast a ballot in the 2023 general election — the{' '}
-              <strong className="font-semibold text-ink">lowest turnout</strong> since the return to
-              democracy in 1999.
-            </p>
-          </div>
 
-          <div className="mt-[clamp(3rem,6vw,6rem)] grid gap-[clamp(1.5rem,4vw,4rem)] border-t border-ink/10 pt-[clamp(2rem,4vw,3rem)] sm:grid-cols-3">
-            <Stat value="93.4M" label="registered voters" />
-            <Stat value="24.9M" label="actually voted" />
-            <Stat value="~1 in 4" label="decided the outcome for all" />
-          </div>
-        </section>
+            <Reveal
+              group
+              className="mt-[clamp(1.75rem,4vw,3rem)] grid gap-[clamp(1.25rem,3vw,3rem)] border-t border-ink/10 pt-[clamp(1.5rem,3vw,2.25rem)] sm:grid-cols-3"
+            >
+              <Stat value="93.4M" label="registered voters" />
+              <Stat value="24.9M" label="actually voted" />
+              <Stat value="~1 in 4" label="decided the outcome for all" />
+            </Reveal>
+          </section>
+        </Reveal>
 
         {/* ── Before the vote — Civic library ────────────────── */}
-        <section
-          id="civic"
-          className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] py-[clamp(4rem,10vw,9rem)]`}
-        >
-          <div className="order-2 min-w-[300px] flex-1 basis-[420px]">
-            <Eyebrow>Before the vote · Civic library</Eyebrow>
-            <h2 className="mt-6 max-w-[15ch] text-[clamp(2rem,4.2vw,3.4rem)] font-bold leading-[1.03] tracking-[-0.025em]">
-              Learn what should and shouldn’t happen.
-            </h2>
-            <p className="mt-6 max-w-[44ch] text-[clamp(1.05rem,1.35vw,1.28rem)] leading-relaxed text-muted">
-              Clear, plain-English articles on your rights, how accreditation works, and what counts
-              as malpractice — so you arrive knowing what to expect.
-            </p>
-            <a
-              href="#dashboard"
-              className="mt-7 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
-            >
-              Open the civic library <span aria-hidden>→</span>
-            </a>
-          </div>
-
-          <div className="order-1 min-w-[280px] flex-1 basis-[360px]">
-            <div className="rounded-2xl border border-ink/15 bg-cream p-3 shadow-[0_18px_40px_rgba(15,31,23,0.08)]">
-              <div className="flex items-center justify-between px-3 py-2 font-mono text-[0.66rem] uppercase tracking-[0.16em] text-muted">
-                <span>Civic library</span>
-                <span>{CIVIC_ARTICLES.length} articles</span>
-              </div>
-              <ul className="flex flex-col gap-2">
-                {CIVIC_ARTICLES.map((a) => (
-                  <li
-                    key={a.title}
-                    className="rounded-xl border border-ink/10 bg-white/60 p-4 transition-colors hover:border-lime/60"
-                  >
-                    <span className="font-mono text-[0.64rem] uppercase tracking-[0.14em] text-leaf">
-                      {a.tag}
-                    </span>
-                    <p className="mt-1.5 text-[1.02rem] font-semibold leading-snug">{a.title}</p>
-                  </li>
-                ))}
-              </ul>
+        <Reveal>
+          <section
+            id="civic"
+            className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] py-[clamp(4rem,10vw,9rem)]`}
+          >
+            <div className="order-2 min-w-[300px] flex-1 basis-[420px]">
+              <Eyebrow>Before the vote · Civic library</Eyebrow>
+              <h2 className="mt-6 max-w-[15ch] text-[clamp(2rem,4.2vw,3.4rem)] font-bold leading-[1.03] tracking-[-0.025em]">
+                Learn what should and shouldn’t happen.
+              </h2>
+              <p className="mt-6 max-w-[44ch] text-[clamp(1.05rem,1.35vw,1.28rem)] leading-relaxed text-muted">
+                Clear, plain-English articles on your rights, how accreditation works, and what
+                counts as malpractice, so you arrive knowing what to expect.
+              </p>
+              <a
+                href="#dashboard"
+                className="mt-7 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
+              >
+                Open the civic library <span aria-hidden>→</span>
+              </a>
             </div>
-          </div>
-        </section>
+
+            <div className="order-1 flex min-w-[280px] flex-1 basis-[360px] justify-center md:justify-start">
+              <div
+                className="group relative w-full max-w-[400px]"
+                style={{ height: 'clamp(320px, 42vw, 400px)' }}
+              >
+                {CIVIC_ARTICLES.map((a, i) => (
+                  <article
+                    key={a.title}
+                    className="absolute inset-x-0 rounded-2xl border border-ink/12 bg-white/85 p-5 shadow-[0_16px_36px_rgba(15,31,23,0.10)] backdrop-blur transition-all duration-300 hover:-translate-y-1.5 hover:border-lime/60"
+                    style={{ top: `${i * 84}px`, height: 158, zIndex: i + 1 }}
+                  >
+                    <span
+                      className="absolute -top-2 left-5 h-4 w-12 rounded-t-md bg-lime/70"
+                      aria-hidden
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-leaf">
+                        {a.tag}
+                      </span>
+                      <span className="font-mono text-[0.62rem] tracking-[0.1em] text-muted">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <p className="mt-3 max-w-[24ch] text-[1.08rem] font-semibold leading-snug">
+                      {a.title}
+                    </p>
+                    <span className="absolute bottom-4 left-5 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-ink/50">
+                      Read <span aria-hidden>→</span>
+                    </span>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        </Reveal>
 
         {/* ── On the day — LGA ratings ───────────────────────── */}
+        <Reveal>
         <section
           className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] pb-[clamp(4rem,10vw,9rem)]`}
         >
@@ -187,11 +208,13 @@ export default function Home() {
             </div>
           </div>
         </section>
+        </Reveal>
 
         {/* ── After the vote — Live results ──────────────────── */}
+        <Reveal>
         <section
           id="results"
-          className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] bg-forest py-[clamp(5rem,12vw,11rem)] text-cream`}
+          className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] bg-forest py-[clamp(3.5rem,8vw,6.5rem)] text-cream`}
         >
           <div className="min-w-[300px] flex-1 basis-[420px]">
             <Eyebrow light>After the vote · Live results</Eyebrow>
@@ -229,15 +252,17 @@ export default function Home() {
             ))}
           </div>
         </section>
+        </Reveal>
 
         {/* ── Closing CTA ────────────────────────────────────── */}
-        <section id="dashboard" className={`${SECTION_X} py-[clamp(6rem,14vw,12rem)] text-center`}>
-          <div className="mx-auto max-w-[16ch]">
+        <Reveal>
+        <section id="dashboard" className={`${SECTION_X} py-[clamp(5rem,12vw,10rem)] text-center`}>
+          <div className="mx-auto max-w-[700px]">
             <span className="mb-7 inline-flex items-center gap-2 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-leaf">
               <span className="inline-block h-px w-6 bg-lime" aria-hidden />
               Be the record
             </span>
-            <h2 className="text-[clamp(2.5rem,6vw,4.8rem)] font-extrabold leading-none tracking-[-0.035em]">
+            <h2 className="mx-auto max-w-[14ch] text-[clamp(2.5rem,6vw,4.8rem)] font-extrabold leading-[1.02] tracking-[-0.035em] [text-wrap:balance]">
               Nigeria is counting on you to count.
             </h2>
           </div>
@@ -256,6 +281,7 @@ export default function Home() {
             </a>
           </div>
         </section>
+        </Reveal>
       </main>
       <SiteFooter />
     </>
