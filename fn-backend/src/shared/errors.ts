@@ -14,6 +14,7 @@ export const ERROR_CODES = {
   DUPLICATE_SLUG: { http: 409, code: 'DUPLICATE_SLUG' },
   ALREADY_RATED: { http: 409, code: 'ALREADY_RATED' },
   RATING_NOT_OPEN: { http: 422, code: 'RATING_NOT_OPEN' },
+  UPLOAD_NOT_OPEN: { http: 422, code: 'UPLOAD_NOT_OPEN' },
   ALREADY_SUBMITTED: { http: 409, code: 'ALREADY_SUBMITTED' },
   FILE_TOO_LARGE: { http: 413, code: 'FILE_TOO_LARGE' },
   INVALID_FILE_TYPE: { http: 415, code: 'INVALID_FILE_TYPE' },

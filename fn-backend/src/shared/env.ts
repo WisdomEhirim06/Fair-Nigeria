@@ -29,6 +29,12 @@ const envSchema = z.object({
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET_NAME: z.string().optional(),
+  // Public base URL the immutable bucket is served from (CDN or r2.dev domain),
+  // e.g. https://sheets.fairnigeria.org. Used to build each sheet's public URL.
+  R2_PUBLIC_BASE_URL: z.string().url().optional(),
+
+  // Largest EC8A upload accepted, in bytes. Default 10 MB.
+  UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(10_485_760),
 
   FCM_SERVICE_ACCOUNT_B64: z.string().optional(),
 
@@ -41,6 +47,9 @@ const envSchema = z.object({
   RATE_LIMIT_GLOBAL_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
   RATE_LIMIT_OTP_MAX: z.coerce.number().int().positive().default(10),
   RATE_LIMIT_OTP_WINDOW_MS: z.coerce.number().int().positive().default(3_600_000),
+  // Sheet flagging: guests/citizens may raise at most N flags per window per IP.
+  RATE_LIMIT_FLAG_MAX: z.coerce.number().int().positive().default(5),
+  RATE_LIMIT_FLAG_WINDOW_MS: z.coerce.number().int().positive().default(3_600_000),
 
   // Number of proxy hops to trust for client IP resolution (Cloudflare → Railway).
   // Default to 0 (don't trust X-Forwarded-For) unless explicitly configured for a known proxy setup.

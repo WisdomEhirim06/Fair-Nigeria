@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -14,6 +15,9 @@ import {
 
 
 export const electionStatus = pgEnum('election_status', ['upcoming', 'active', 'concluded']);
+
+
+export const sheetStatus = pgEnum('sheet_status', ['pending', 'verified', 'disputed']);
 
 // Fixed civic-content categories.
 export const articleCategory = pgEnum('article_category', [
@@ -123,11 +127,6 @@ export const lgas = pgTable(
 );
 
 
-//  Citizen experience ratings
-//  One rating per citizen per election (UNIQUE user_id+election_id). The five
-//  criteria are fixed yes/no questions (see ratings.schemas RATING_CRITERIA).
-//  user_id has no FK — the user row lives in the isolated fn_auth database, so
-//  referential integrity is enforced at the app layer by the auth middleware.
 export const ratings = pgTable(
   'ratings',
   {
@@ -136,11 +135,9 @@ export const ratings = pgTable(
     electionId: uuid('election_id')
       .notNull()
       .references(() => elections.id),
-    // The LGA where the citizen voted. Unrestricted — any LGA in Nigeria.
     lgaId: uuid('lga_id')
       .notNull()
       .references(() => lgas.id),
-    // Five fixed yes/no criteria. Keys mirror RATING_CRITERIA in ratings.schemas.
     noIntimidation: boolean('no_intimidation').notNull(),
     accreditationProper: boolean('accreditation_proper').notNull(),
     votingOrderly: boolean('voting_orderly').notNull(),
@@ -151,8 +148,137 @@ export const ratings = pgTable(
   (table) => [
     // One rating per citizen per election, DB-enforced.
     uniqueIndex('ratings_user_election_idx').on(table.userId, table.electionId),
-    // Supports the dashboard aggregation: group by lga within an election.
     index('ratings_election_lga_idx').on(table.electionId, table.lgaId),
+  ],
+);
+
+
+export const electionParties = pgTable(
+  'election_parties',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id),
+    name: varchar('name', { length: 160 }).notNull(),
+    abbreviation: varchar('abbreviation', { length: 20 }).notNull(),
+    candidateName: varchar('candidate_name', { length: 160 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('election_parties_election_abbr_idx').on(table.electionId, table.abbreviation),
+    index('election_parties_election_idx').on(table.electionId),
+  ],
+);
+
+//  Uploaded EC8A sheets. 
+export const sheets = pgTable(
+  'sheets',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id),
+    stateId: uuid('state_id')
+      .notNull()
+      .references(() => states.id),
+    lgaId: uuid('lga_id')
+      .notNull()
+      .references(() => lgas.id),
+    puCode: varchar('pu_code', { length: 120 }).notNull(),
+    uploadedBy: uuid('uploaded_by').notNull(),
+    r2Key: varchar('r2_key', { length: 300 }).notNull(),
+    // Server-computed SHA-256 hex of the file bytes. Publicly displayed.
+    fileHash: varchar('file_hash', { length: 64 }).notNull(),
+    mimeType: varchar('mime_type', { length: 80 }).notNull(),
+    fileSize: integer('file_size').notNull(),
+    status: sheetStatus('status').notNull().default('pending'),
+    flagCount: integer('flag_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('sheets_election_lga_idx').on(table.electionId, table.lgaId),
+    index('sheets_status_idx').on(table.status),
+  ],
+);
+
+
+export const transcriptionEntries = pgTable(
+  'transcription_entries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sheetId: uuid('sheet_id')
+      .notNull()
+      .references(() => sheets.id),
+    transcriberId: uuid('transcriber_id').notNull(),
+    accreditedVoters: integer('accredited_voters').notNull(),
+    totalValidVotes: integer('total_valid_votes').notNull(),
+    rejectedBallots: integer('rejected_ballots').notNull(),
+    totalVotesCast: integer('total_votes_cast').notNull(),
+    partyVotes: jsonb('party_votes').notNull(),
+    figureHash: varchar('figure_hash', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // One entry per transcriber per sheet.
+    uniqueIndex('transcription_entries_sheet_transcriber_idx').on(
+      table.sheetId,
+      table.transcriberId,
+    ),
+    index('transcription_entries_sheet_idx').on(table.sheetId),
+  ],
+);
+
+export const electionResults = pgTable(
+  'election_results',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sheetId: uuid('sheet_id')
+      .notNull()
+      .references(() => sheets.id),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id),
+    stateId: uuid('state_id')
+      .notNull()
+      .references(() => states.id),
+    lgaId: uuid('lga_id')
+      .notNull()
+      .references(() => lgas.id),
+    puCode: varchar('pu_code', { length: 120 }).notNull(),
+    accreditedVoters: integer('accredited_voters').notNull(),
+    totalValidVotes: integer('total_valid_votes').notNull(),
+    rejectedBallots: integer('rejected_ballots').notNull(),
+    totalVotesCast: integer('total_votes_cast').notNull(),
+    partyVotes: jsonb('party_votes').notNull(),
+    agreedEntryIds: jsonb('agreed_entry_ids').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // Exactly one result per sheet.
+    uniqueIndex('election_results_sheet_idx').on(table.sheetId),
+    index('election_results_election_lga_idx').on(table.electionId, table.lgaId),
+  ],
+);
+
+//  Public flags raised against a sheet. Guests may flag
+export const sheetFlags = pgTable(
+  'sheet_flags',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sheetId: uuid('sheet_id')
+      .notNull()
+      .references(() => sheets.id),
+    flaggedBy: uuid('flagged_by'),
+    ipAddress: varchar('ip_address', { length: 45 }).notNull(),
+    reason: varchar('reason', { length: 300 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // One flag per IP per sheet.
+    uniqueIndex('sheet_flags_sheet_ip_idx').on(table.sheetId, table.ipAddress),
+    index('sheet_flags_sheet_idx').on(table.sheetId),
   ],
 );
 
@@ -170,3 +296,13 @@ export type Lga = typeof lgas.$inferSelect;
 export type NewLga = typeof lgas.$inferInsert;
 export type Rating = typeof ratings.$inferSelect;
 export type NewRating = typeof ratings.$inferInsert;
+export type ElectionParty = typeof electionParties.$inferSelect;
+export type NewElectionParty = typeof electionParties.$inferInsert;
+export type Sheet = typeof sheets.$inferSelect;
+export type NewSheet = typeof sheets.$inferInsert;
+export type TranscriptionEntry = typeof transcriptionEntries.$inferSelect;
+export type NewTranscriptionEntry = typeof transcriptionEntries.$inferInsert;
+export type ElectionResult = typeof electionResults.$inferSelect;
+export type NewElectionResult = typeof electionResults.$inferInsert;
+export type SheetFlag = typeof sheetFlags.$inferSelect;
+export type NewSheetFlag = typeof sheetFlags.$inferInsert;

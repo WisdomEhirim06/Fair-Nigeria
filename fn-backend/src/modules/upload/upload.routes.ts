@@ -1,5 +1,34 @@
 import { Router } from 'express';
 
+import { flagRateLimiter } from '../../shared/middleware/rate-limit';
+import { requireAuth } from '../../shared/middleware/require-auth';
+import { requireRole } from '../../shared/middleware/require-role';
+import { validate } from '../../shared/middleware/validate';
+import {
+  flagSheetHandler,
+  getSheetHandler,
+  listSheetsHandler,
+  uploadSheetHandler,
+} from './upload.controller';
+import { flagSheetBodySchema, sheetIdParamSchema } from './upload.schemas';
+
+// /api/v1/upload — write side (Yiaga officials).
 export const uploadRouter = Router();
 
+// Multipart body is parsed by busboy in the handler, so no body validator here.
+uploadRouter.post('/', requireAuth, requireRole('yiaga_official'), uploadSheetHandler);
+
+// /api/v1/sheets — public read side + flagging.
 export const sheetsRouter = Router();
+
+sheetsRouter.get('/', listSheetsHandler);
+sheetsRouter.get('/:id', validate(sheetIdParamSchema, 'params'), getSheetHandler);
+
+// Flagging is open to everyone (guests included); rate-limited per IP.
+sheetsRouter.post(
+  '/:id/flag',
+  flagRateLimiter,
+  validate(sheetIdParamSchema, 'params'),
+  validate(flagSheetBodySchema),
+  flagSheetHandler,
+);
