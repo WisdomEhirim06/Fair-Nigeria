@@ -16,7 +16,7 @@ import type {
 
 export type Actor = AuditActor;
 
-/** Metadata produced by streaming the uploaded file to R2. */
+
 export interface UploadedFile {
   r2Key: string;
   fileHash: string;
@@ -24,7 +24,7 @@ export interface UploadedFile {
   mimeType: string;
 }
 
-function toPublicSheet(row: Sheet): PublicSheet {
+export function toPublicSheet(row: Sheet): PublicSheet {
   return {
     id: row.id,
     electionId: row.electionId,
@@ -156,11 +156,7 @@ export async function getSheet(id: string): Promise<PublicSheet> {
   return toPublicSheet(row);
 }
 
-/**
- * Record a public flag against a sheet and bump its flag count. One flag per IP
- * per sheet (DB-enforced). Flags never change the figures — they only surface a
- * sheet for review.
- */
+
 export async function flagSheet(
   sheetId: string,
   flaggedBy: string | null,

@@ -6,10 +6,12 @@ import { registry } from './registry';
 import '../../modules/auth/auth.docs';
 import '../../modules/admin/admin.docs';
 import '../../modules/elections/elections.docs';
+import '../../modules/elections/elections.parties.docs';
 import '../../modules/content/content.docs';
 import '../../modules/geography/geography.docs';
 import '../../modules/ratings/ratings.docs';
 import '../../modules/upload/upload.docs';
+import '../../modules/consensus/consensus.docs';
 import '../../modules/dashboard/dashboard.docs';
 
 registry.registerPath({
