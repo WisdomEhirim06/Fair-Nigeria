@@ -1,4 +1,6 @@
+import cors from 'cors';
 import express, { type Express } from 'express';
+import helmet from 'helmet';
 import { randomUUID } from 'node:crypto';
 import pinoHttp from 'pino-http';
 import { env } from './shared/env';
@@ -15,9 +17,19 @@ export function createApp(): Express {
   const app = express();
 
   app.set('trust proxy', env.TRUST_PROXY_HOPS);
+  app.use(helmet({ contentSecurityPolicy: false }));
+  
+  const corsOrigins = env.CORS_ORIGINS?.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  app.use(
+    cors({
+      origin: corsOrigins && corsOrigins.length > 0 ? corsOrigins : env.NODE_ENV === 'development',
+      methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    }),
+  );
 
-  // Request logging with a generated request id, echoed back in a header so it
-  // can be correlated with the `requestId` field in every response envelope.
+  
   app.use(
     pinoHttp({
       logger,
@@ -31,7 +43,6 @@ export function createApp(): Express {
         `${req.method} ${req.url} ${res.statusCode} ${responseTime}ms`,
       customErrorMessage: (req, res, _err) =>
         `${req.method} ${req.url} ${res.statusCode}`,
-      // Colour the line by outcome: 5xx → error, 4xx → warn, else info.
       customLogLevel: (_req, res, err) => {
         if (res.statusCode >= 500 || err) return 'error';
         if (res.statusCode >= 400) return 'warn';
@@ -52,7 +63,7 @@ export function createApp(): Express {
   // Global per-IP rate limit guards the whole API (health + docs stay unlimited).
   app.use('/api/v1', globalRateLimiter, apiRouter);
 
-  // 404 then terminal error handler (must be registered last).
+  // 404 then terminal error handler
   app.use(notFound);
   app.use(errorHandler);
 

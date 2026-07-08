@@ -5,6 +5,7 @@ import { inviteCodes, users, type InviteCode } from '../../db/auth/schema';
 import { generateInviteCode, normalizeInviteCode, sha256Hex } from '../../shared/crypto';
 import { isUniqueViolation } from '../../shared/db-errors';
 import { AppError } from '../../shared/errors';
+import { writeAuditSafe, type AuditActor } from '../audit/audit.service';
 import type { PublicUser } from '../auth/auth.schemas';
 import { toPublicUser } from '../auth/auth.service';
 import type {
@@ -38,7 +39,7 @@ export interface CreatedInviteCode {
 
 export async function createInviteCode(
   input: CreateInviteCodeInput,
-  adminId: string,
+  actor: AuditActor,
 ): Promise<CreatedInviteCode> {
   const expiresAt = new Date(input.expiresAt);
   if (expiresAt.getTime() <= Date.now()) {
@@ -59,9 +60,19 @@ export async function createInviteCode(
         geopoliticalZone: input.geopoliticalZone,
         maxUses: input.maxUses,
         expiresAt,
-        createdBy: adminId,
+        createdBy: actor.id,
       })
       .returning();
+
+    await writeAuditSafe({
+      actorId: actor.id,
+      actorRole: actor.role,
+      action: 'invite_code.create',
+      entityType: 'invite_code',
+      entityId: row.id,
+      metadata: { role: row.role, state: row.state, maxUses: row.maxUses },
+      ipAddress: actor.ip,
+    });
 
     return { code: plaintext, inviteCode: toPublicInviteCode(row) };
   } catch (err) {
@@ -85,7 +96,7 @@ export async function listInviteCodes(): Promise<PublicInviteCode[]> {
 }
 
 /** Revoke a code (set isActive = false). Idempotent; 404 if the id doesn't exist. */
-export async function revokeInviteCode(id: string): Promise<PublicInviteCode> {
+export async function revokeInviteCode(id: string, actor: AuditActor): Promise<PublicInviteCode> {
   const [row] = await authDb
     .update(inviteCodes)
     .set({ isActive: false })
@@ -95,6 +106,16 @@ export async function revokeInviteCode(id: string): Promise<PublicInviteCode> {
   if (!row) {
     throw new AppError('NOT_FOUND', 'Invite code not found.');
   }
+
+  await writeAuditSafe({
+    actorId: actor.id,
+    actorRole: actor.role,
+    action: 'invite_code.revoke',
+    entityType: 'invite_code',
+    entityId: row.id,
+    ipAddress: actor.ip,
+  });
+
   return toPublicInviteCode(row);
 }
 
@@ -137,7 +158,11 @@ export async function getUser(id: string): Promise<PublicUser> {
   return toPublicUser(user);
 }
 
-export async function updateUser(id: string, patch: UpdateUserInput): Promise<PublicUser> {
+export async function updateUser(
+  id: string,
+  patch: UpdateUserInput,
+  actor: AuditActor,
+): Promise<PublicUser> {
   const [row] = await authDb
     .update(users)
     .set({ ...patch, updatedAt: new Date() })
@@ -147,5 +172,17 @@ export async function updateUser(id: string, patch: UpdateUserInput): Promise<Pu
   if (!row) {
     throw new AppError('NOT_FOUND', 'User not found.');
   }
+
+  await writeAuditSafe({
+    actorId: actor.id,
+    actorRole: actor.role,
+    action: 'user.update',
+    entityType: 'user',
+    entityId: row.id,
+    // Record which fields changed, not the values (avoid logging sensitive data).
+    metadata: { fields: Object.keys(patch) },
+    ipAddress: actor.ip,
+  });
+
   return toPublicUser(row);
 }

@@ -1,6 +1,10 @@
 import { Router } from 'express';
 
-/**
- * Audit module:  /api/v1/audit
- */
+import { validate } from '../../shared/middleware/validate';
+import { listAuditHandler } from './audit.controller';
+import { auditQuerySchema } from './audit.schemas';
+
+// /api/v1/audit
 export const auditRouter = Router();
+
+auditRouter.get('/', validate(auditQuerySchema, 'query'), listAuditHandler);

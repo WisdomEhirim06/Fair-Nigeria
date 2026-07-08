@@ -35,6 +35,15 @@ export const globalRateLimiter = rateLimit({
   store: redisStore('rl:global:'),
 });
 
+// Flag limiter: caps sheet flags per IP per window (guests included).
+export const flagRateLimiter = rateLimit({
+  ...baseOptions,
+  windowMs: env.RATE_LIMIT_FLAG_WINDOW_MS,
+  limit: env.RATE_LIMIT_FLAG_MAX,
+  store: redisStore('rl:flag:'),
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? ''),
+});
+
 // OTP limiter: caps OTP requests per phone number per hour
 
 export const otpRateLimiter = rateLimit({
