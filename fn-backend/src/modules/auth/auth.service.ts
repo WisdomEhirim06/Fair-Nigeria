@@ -1,11 +1,30 @@
 import { eq, and, gt, sql } from 'drizzle-orm';
 
-import { authDb } from '../../db';
+import { appDb, authDb } from '../../db';
+import { states } from '../../db/app/schema';
 import { inviteCodes, users, type User } from '../../db/auth/schema';
 import { normalizeInviteCode, sha256Hex } from '../../shared/crypto';
 import { isUniqueViolation } from '../../shared/db-errors';
 import { AppError } from '../../shared/errors';
 import type { PublicUser, RegisterInput } from './auth.schemas';
+
+
+async function resolveState(name?: string): Promise<{ name: string; zone: string } | null> {
+  if (!name) return null;
+  const [row] = await appDb
+    .select({ name: states.name, zone: states.zone })
+    .from(states)
+    .where(sql`lower(${states.name}) = lower(${name})`)
+    .limit(1);
+  if (!row) {
+    throw new AppError(
+      'VALIDATION_ERROR',
+      `Unknown state '${name}'. It must be one of Nigeria's 36 states or the FCT (e.g. 'Lagos').`,
+      'state',
+    );
+  }
+  return { name: row.name, zone: row.zone };
+}
 
 export async function getUserById(id: string): Promise<PublicUser> {
   const [user] = await authDb
@@ -59,6 +78,9 @@ export async function registerUser(input: RegisterInput): Promise<User> {
     return registerWithInviteCode(input, input.inviteCode);
   }
 
+  // Reject unknown states
+  const resolved = await resolveState(input.state);
+
   try {
     const [row] = await authDb
       .insert(users)
@@ -67,8 +89,8 @@ export async function registerUser(input: RegisterInput): Promise<User> {
         phoneNumber: input.phoneNumber,
         ninHash: input.ninHash,
         role: 'citizen',
-        state: input.state,
-        geopoliticalZone: input.geopoliticalZone,
+        state: resolved?.name ?? null,
+        geopoliticalZone: resolved?.zone ?? input.geopoliticalZone ?? null,
       })
       .returning();
 

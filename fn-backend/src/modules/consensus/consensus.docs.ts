@@ -58,7 +58,9 @@ registry.registerPath({
     201: jsonOk(SubmitEntryResult, 'Reading recorded; includes the sheet status after evaluation.'),
     404: jsonError('Sheet not found.'),
     409: jsonError('Already transcribed, or the sheet is already resolved.'),
-    422: jsonError('Self-transcription, no parties configured, or party votes mismatch.'),
+    422: jsonError(
+      'Self-transcription, no parties configured, party votes mismatch, or figures do not tally.',
+    ),
     ...authErrors(),
     ...commonErrors(),
   },

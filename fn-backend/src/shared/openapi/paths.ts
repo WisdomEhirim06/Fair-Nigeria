@@ -13,6 +13,7 @@ import '../../modules/ratings/ratings.docs';
 import '../../modules/upload/upload.docs';
 import '../../modules/consensus/consensus.docs';
 import '../../modules/dashboard/dashboard.docs';
+import '../../modules/audit/audit.docs';
 
 registry.registerPath({
   method: 'get',

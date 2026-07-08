@@ -4,11 +4,8 @@ import postgres from 'postgres';
 import { env } from '../../shared/env';
 import * as schema from './schema';
 
-/**
- * Drizzle client for the auth database (fn_auth).
+// Drizzle client for the auth database (fn_auth).
 
- * Uses the auth_user role — intentionally isolated from the main app database.
- */
 const client = postgres(env.AUTH_DATABASE_URL, {
   ssl: env.NODE_ENV === 'production' ? 'require' : false,
   max: 5,

@@ -27,6 +27,16 @@ const RegisterRequest = registry.register('RegisterRequest', registerBodySchema.
 
 const PublicUser = registry.register('PublicUser', publicUserSchema);
 
+const RegisterResponse = registry.register(
+  'RegisterResponse',
+  z.object({
+    user: publicUserSchema,
+    otpSent: z
+      .boolean()
+      .openapi({ description: 'Whether the login OTP was dispatched. If false, call request-otp.' }),
+  }),
+);
+
 const RequestOtpRequest = registry.register('RequestOtpRequest', requestOtpBodySchema.openapi({
   example: { phoneNumber: '+2348012345678' },
 }));
@@ -57,11 +67,14 @@ registry.registerPath({
   tags: ['Auth'],
   summary: 'Register a citizen',
   description:
-    'Creates a citizen account from a client-side SHA-256 NIN hash. ' +
-    'The raw NIN never reaches the server. Duplicate nin_hash or phone_number → 409.',
+    'Creates a citizen account from a client-side SHA-256 NIN hash and immediately ' +
+    'dispatches a login OTP — go straight to verify-otp next. The raw NIN never ' +
+    'reaches the server. `state`, if given, must be a real Nigerian state (the zone ' +
+    'is derived from it). Duplicate nin_hash or phone_number → 409.',
   request: { body: { required: true, content: { 'application/json': { schema: RegisterRequest } } } },
   responses: {
-    201: jsonOk(PublicUser, 'Account created.'),
+    201: jsonOk(RegisterResponse, 'Account created; OTP dispatched.'),
+    400: jsonError('Validation failed (e.g. unknown state).'),
     409: jsonError('NIN or phone number already registered.'),
     422: jsonError('Invite code is invalid, expired, or fully used.'),
     ...commonErrors(),

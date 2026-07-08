@@ -170,14 +170,51 @@ export async function submitEntry(
     );
   }
 
-  // partyVotes must cover exactly the configured parties
-  const configured = new Set(parties.map((p) => p.id));
-  const submitted = Object.keys(input.partyVotes);
-  if (submitted.length !== configured.size || !submitted.every((id) => configured.has(id))) {
+  // partyVotes must cover exactly the configured parties — name the offenders so
+  // the transcriber knows what to fix.
+  const configuredIds = new Set(parties.map((p) => p.id));
+  const missing = parties.filter((p) => !(p.id in input.partyVotes));
+  const unexpected = Object.keys(input.partyVotes).filter((id) => !configuredIds.has(id));
+  if (missing.length > 0 || unexpected.length > 0) {
+    const detail = [
+      missing.length ? `missing votes for ${missing.map((p) => p.abbreviation).join(', ')}` : '',
+      unexpected.length ? `unexpected party id(s): ${unexpected.join(', ')}` : '',
+    ]
+      .filter(Boolean)
+      .join('; ');
     throw new AppError(
       'PARTY_VOTES_MISMATCH',
-      'partyVotes must contain exactly one entry for each configured party.',
+      `partyVotes must contain exactly one entry for each of this election's ${parties.length} ` +
+        `parties (${parties.map((p) => p.abbreviation).join(', ')}) — ${detail}.`,
       'partyVotes',
+    );
+  }
+
+  // Validation to ensure the figures correlate
+  const partySum = Object.values(input.partyVotes).reduce((sum, v) => sum + v, 0);
+  if (partySum !== input.totalValidVotes) {
+    throw new AppError(
+      'FIGURE_TALLY_MISMATCH',
+      `Party votes add up to ${partySum}, but total valid votes is ${input.totalValidVotes}. ` +
+        'The party votes must sum to the total valid votes.',
+      'totalValidVotes',
+    );
+  }
+  if (input.totalValidVotes + input.rejectedBallots !== input.totalVotesCast) {
+    throw new AppError(
+      'FIGURE_TALLY_MISMATCH',
+      `Valid votes (${input.totalValidVotes}) + rejected ballots (${input.rejectedBallots}) = ` +
+        `${input.totalValidVotes + input.rejectedBallots}, but total votes cast is ` +
+        `${input.totalVotesCast}. They must be equal.`,
+      'totalVotesCast',
+    );
+  }
+  if (input.totalVotesCast > input.accreditedVoters) {
+    throw new AppError(
+      'FIGURE_TALLY_MISMATCH',
+      `Total votes cast (${input.totalVotesCast}) cannot exceed accredited voters ` +
+        `(${input.accreditedVoters}).`,
+      'totalVotesCast',
     );
   }
 
