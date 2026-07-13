@@ -46,8 +46,3 @@ npm run format
 The backend starts on `http://localhost:3000` by default. Check `GET /health` to confirm it is up.
 
 Copy `fn-backend/.env.example` to `fn-backend/.env` and fill values as modules are implemented.
-
-## Status
-
-Under active development, built in public. See `Fair_Nigeria_Sprint_Plan.xlsx` for the sprint and
-posting schedule.
