@@ -1,16 +1,24 @@
 import type { RequestHandler } from 'express';
 
+import { clearRefreshCookie, REFRESH_COOKIE_NAME, setRefreshCookie } from '../../shared/cookies';
+import { AppError } from '../../shared/errors';
 import { logger } from '../../shared/logger';
 import { successEnvelope } from '../../shared/response';
 import type { RegisterInput } from './auth.schemas';
 import { getUserById, registerUser, toPublicUser } from './auth.service';
-import type { RefreshInput, RequestOtpInput, VerifyOtpInput } from './otp.schemas';
+import type { RequestOtpInput, VerifyOtpInput } from './otp.schemas';
 import {
   requestOtp,
   revokeRefreshToken,
   rotateRefreshToken,
   verifyOtpAndIssueTokens,
 } from './otp.service';
+
+// Read the refresh token from its httpOnly cookie
+function refreshTokenFrom(req: Parameters<RequestHandler>[0]): string | undefined {
+  const cookies = req.cookies as Record<string, string> | undefined;
+  return cookies?.[REFRESH_COOKIE_NAME];
+}
 
 
 export const register: RequestHandler = async (req, res, next) => {
@@ -47,19 +55,29 @@ export const requestOtpHandler: RequestHandler = async (req, res, next) => {
 export const verifyOtpHandler: RequestHandler = async (req, res, next) => {
   try {
     const tokens = await verifyOtpAndIssueTokens(req.body as VerifyOtpInput);
+    setRefreshCookie(res, tokens.refreshToken);
     const requestId = req.id as unknown as string;
-    res.json(successEnvelope(tokens, requestId));
+    res.json(
+      successEnvelope({ accessToken: tokens.accessToken, expiresIn: tokens.expiresIn }, requestId),
+    );
   } catch (err) {
     next(err);
   }
 };
 
-// POST /auth/refresh
+// POST /auth/refresh — rotate the refresh cookie, return a fresh access token.
 export const refreshHandler: RequestHandler = async (req, res, next) => {
   try {
-    const tokens = await rotateRefreshToken((req.body as RefreshInput).refreshToken);
+    const current = refreshTokenFrom(req);
+    if (!current) {
+      throw new AppError('UNAUTHORIZED', 'No refresh token.');
+    }
+    const tokens = await rotateRefreshToken(current);
+    setRefreshCookie(res, tokens.refreshToken);
     const requestId = req.id as unknown as string;
-    res.json(successEnvelope(tokens, requestId));
+    res.json(
+      successEnvelope({ accessToken: tokens.accessToken, expiresIn: tokens.expiresIn }, requestId),
+    );
   } catch (err) {
     next(err);
   }
@@ -76,10 +94,14 @@ export const getMeHandler: RequestHandler = async (req, res, next) => {
   }
 };
 
-// POST /auth/logout
+// POST /auth/logout — revoke the refresh token from the cookie and clear it.
 export const logoutHandler: RequestHandler = async (req, res, next) => {
   try {
-    await revokeRefreshToken((req.body as RefreshInput).refreshToken);
+    const current = refreshTokenFrom(req);
+    if (current) {
+      await revokeRefreshToken(current);
+    }
+    clearRefreshCookie(res);
     const requestId = req.id as unknown as string;
     res.json(successEnvelope({ message: 'Logged out.' }, requestId));
   } catch (err) {

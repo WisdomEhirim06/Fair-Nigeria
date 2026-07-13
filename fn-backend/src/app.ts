@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
@@ -26,10 +27,14 @@ export function createApp(): Express {
     cors({
       origin: corsOrigins && corsOrigins.length > 0 ? corsOrigins : env.NODE_ENV === 'development',
       methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+      // Required so the browser sends/receives the httpOnly refresh cookie.
+      credentials: true,
     }),
   );
 
-  
+  app.use(cookieParser());
+
+
   app.use(
     pinoHttp({
       logger,
