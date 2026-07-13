@@ -6,14 +6,14 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { OtpForm } from './OtpForm';
 
 type Props = {
-  // Call onDone to slide to the OTP step.
-  renderFirst: (onDone: () => void) => ReactNode;
+  renderFirst: (onDone: (phone: string) => void) => ReactNode;
 };
 
 
 export function AuthFlow({ renderFirst }: Props) {
   const router = useRouter();
   const [step, setStep] = useState<'first' | 'otp'>('first');
+  const [phone, setPhone] = useState('');
   const showOtp = step === 'otp';
 
   const firstRef = useRef<HTMLDivElement>(null);
@@ -48,6 +48,7 @@ export function AuthFlow({ renderFirst }: Props) {
           {...(!showOtp ? { inert: true } : {})}
         >
           <OtpForm
+            phone={phone}
             active={showOtp}
             onBack={() => setStep('first')}
             onVerified={() => router.push('/dashboard')}
@@ -59,7 +60,10 @@ export function AuthFlow({ renderFirst }: Props) {
           aria-hidden={showOtp}
           {...(showOtp ? { inert: true } : {})}
         >
-          {renderFirst(() => setStep('otp'))}
+          {renderFirst((p) => {
+            setPhone(p);
+            setStep('otp');
+          })}
         </div>
       </div>
     </div>

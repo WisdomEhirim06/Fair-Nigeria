@@ -2,16 +2,18 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
+import { ApiError, requestOtp, verifyOtp } from '@/lib/api';
+
 const OTP_SECONDS = 300;
 
-// This starts the timer for the OTP
 type Props = {
+  phone: string;
   active: boolean;
   onBack: () => void;
   onVerified: () => void;
 };
 
-export function OtpForm({ active, onBack, onVerified }: Props) {
+export function OtpForm({ phone, active, onBack, onVerified }: Props) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string>();
   const [seconds, setSeconds] = useState(OTP_SECONDS);
@@ -40,16 +42,25 @@ export function OtpForm({ active, onBack, onVerified }: Props) {
       return;
     }
     setVerifying(true);
-    // Stub: the wired version will POST /auth/verify-otp and store the session.
-    await new Promise((r) => setTimeout(r, 500));
-    setVerifying(false);
-    onVerified();
+    try {
+      // On success this stores the access token and sets the refresh cookie.
+      await verifyOtp(phone, code);
+      onVerified();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not verify. Please try again.');
+    } finally {
+      setVerifying(false);
+    }
   }
 
-  function resend() {
-    // Stub: the wired version will POST /auth/request-otp.
-    setSeconds(OTP_SECONDS);
-    setError(undefined);
+  async function resend() {
+    try {
+      await requestOtp(phone);
+      setSeconds(OTP_SECONDS);
+      setError(undefined);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not resend the code.');
+    }
   }
 
   return (

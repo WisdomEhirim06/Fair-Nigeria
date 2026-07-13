@@ -2,17 +2,16 @@
 
 import { useId, useState } from 'react';
 
-import { NIGERIAN_STATES } from './states';
-
 type Props = {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
   error?: string;
+  options: readonly string[];
 };
 
-/** State dropdown with the same floating-label treatment as the text fields. */
-export function StateSelect({ value, onChange, onBlur, error }: Props) {
+// State dropdown
+export function StateSelect({ value, onChange, onBlur, error, options }: Props) {
   const id = useId();
   const [focused, setFocused] = useState(false);
   const floated = focused || value.length > 0;
@@ -40,7 +39,7 @@ export function StateSelect({ value, onChange, onBlur, error }: Props) {
           }`}
         >
           <option value="" disabled hidden />
-          {NIGERIAN_STATES.map((s) => (
+          {options.map((s) => (
             <option key={s} value={s} className="text-ink">
               {s}
             </option>

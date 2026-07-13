@@ -2,12 +2,14 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { ApiError, requestOtp } from '@/lib/api';
 import { PhoneField } from './PhoneField';
 
-/** onSubmit fires once the phone validates; it advances to the OTP step. */
-export function LoginForm({ onSubmit }: { onSubmit: () => void }) {
+/** onSubmit fires with the full phone once the OTP has been requested. */
+export function LoginForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string>();
+  const [formError, setFormError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -17,9 +19,15 @@ export function LoginForm({ onSubmit }: { onSubmit: () => void }) {
       return;
     }
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setSubmitting(false);
-    onSubmit();
+    setFormError(undefined);
+    try {
+      await requestOtp(`+234${phone}`);
+      onSubmit(`+234${phone}`);
+    } catch (err) {
+      setFormError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -37,10 +45,15 @@ export function LoginForm({ onSubmit }: { onSubmit: () => void }) {
           onChange={(v) => {
             setPhone(v);
             setError(undefined);
+            setFormError(undefined);
           }}
           error={error}
         />
       </div>
+
+      {formError ? (
+        <p className="mt-4 font-mono text-[0.75rem] text-error">{formError}</p>
+      ) : null}
 
       <button
         type="submit"

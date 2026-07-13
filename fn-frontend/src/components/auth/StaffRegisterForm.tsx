@@ -1,41 +1,30 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 
-import { ApiError, listStates, registerCitizen } from '@/lib/api';
+import { ApiError, registerStaff } from '@/lib/api';
 import { AuthField } from './AuthField';
 import { PhoneField } from './PhoneField';
-import { StateSelect } from './StateSelect';
-import { NIGERIAN_STATES } from './states';
 
-type FieldKey = 'fullName' | 'nin' | 'phone' | 'state';
+type FieldKey = 'fullName' | 'nin' | 'phone' | 'inviteCode';
 type Errors = Partial<Record<FieldKey, string>>;
 
-/** Maps a backend error `field` to the matching form field. */
 const FIELD_MAP: Record<string, FieldKey> = {
   fullName: 'fullName',
   ninHash: 'nin',
   phoneNumber: 'phone',
-  state: 'state',
+  inviteCode: 'inviteCode',
 };
 
-/** onSubmit fires with the full phone (+234XXXXXXXXXX) once registration succeeds. */
-export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
+// The invite code is what differentiate the citizen registration from the official.
+export function StaffRegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
   const [fullName, setFullName] = useState('');
   const [nin, setNin] = useState('');
   const [phone, setPhone] = useState('');
-  const [state, setState] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
-  const [states, setStates] = useState<readonly string[]>(NIGERIAN_STATES);
-
-  // Prefer the live state list; fall back to the static one if the call fails.
-  useEffect(() => {
-    listStates()
-      .then((rows) => setStates(rows.map((r) => r.name)))
-      .catch(() => undefined);
-  }, []);
 
   function clear(key: FieldKey) {
     setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
@@ -47,7 +36,7 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
     if (fullName.trim().length < 2) next.fullName = 'Enter your full name.';
     if (!/^\d{11}$/.test(nin)) next.nin = 'Your NIN is 11 digits.';
     if (!/^\d{10}$/.test(phone)) next.phone = 'Enter the 10 digits after +234.';
-    if (!state) next.state = 'Choose your state.';
+    if (!inviteCode.trim()) next.inviteCode = 'Enter the invite code from your coordinator.';
     return next;
   }
 
@@ -68,12 +57,11 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
 
     setSubmitting(true);
     try {
-      // The NIN is hashed inside registerCitizen before it leaves the device.
-      await registerCitizen({
+      await registerStaff({
         fullName: fullName.trim(),
         phoneNumber: `+234${phone}`,
         nin,
-        state,
+        inviteCode: inviteCode.trim(),
       });
       onSubmit(`+234${phone}`);
     } catch (err) {
@@ -86,10 +74,11 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
   return (
     <form onSubmit={handleSubmit} noValidate>
       <h1 className="text-[clamp(1.9rem,4vw,2.6rem)] font-extrabold leading-[1.05] tracking-[-0.03em]">
-        Create your account
+        Create your staff account
       </h1>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
-        It takes a minute. Your NIN is hashed on your device, never sent or stored.
+        Use the invite code from your coordinator. Your NIN is hashed on your device, never sent or
+        stored.
       </p>
 
       <div className="mt-7 space-y-3.5">
@@ -123,14 +112,16 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
           }}
           error={errors.phone}
         />
-        <StateSelect
-          value={state}
+        <AuthField
+          label="Invite code"
+          value={inviteCode}
           onChange={(v) => {
-            setState(v);
-            clear('state');
+            setInviteCode(v);
+            clear('inviteCode');
           }}
-          error={errors.state}
-          options={states}
+          error={errors.inviteCode}
+          maxLength={120}
+          autoComplete="off"
         />
       </div>
 
