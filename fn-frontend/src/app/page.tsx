@@ -49,18 +49,9 @@ const RESULTS = [
 ];
 
 const VERIFY_STEPS = [
-  {
-    title: 'Officers upload',
-    body: 'Field officers upload the result sheet from every polling unit, straight from where you voted.',
-  },
-  {
-    title: 'People verify',
-    body: 'Two or three people read each sheet on their own. It only counts when their numbers match.',
-  },
-  {
-    title: 'Everyone can see',
-    body: 'Every upload and check goes into a public log that anyone can open and follow.',
-  },
+  { title: 'Officers upload', body: 'Field officers upload the result sheets from each polling unit.' },
+  { title: 'People verify', body: 'Two or three people check every sheet before it counts.' },
+  { title: 'Everyone can see', body: 'Open the public log of every action, anytime.' },
 ];
 
 export default function Home() {
@@ -70,7 +61,7 @@ export default function Home() {
       <main id="main">
         <Hero />
 
-        {/*The 2023 record ───────────────────────────────── */}
+        {/*The 2023 record */}
         <Reveal>
           <section id="turnout" className={`${SECTION_X} py-[clamp(1.75rem,3.5vw,2.75rem)]`}>
             <Eyebrow>The 2023 record</Eyebrow>
@@ -101,24 +92,24 @@ export default function Home() {
           </section>
         </Reveal>
 
-        {/* Before the vote — Civic library ────────────────── */}
+        {/* Before the vote — Civic library */}
         <Reveal>
           <section
             id="civic"
-            className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] py-[clamp(4rem,10vw,9rem)]`}
+            className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2rem,5vw,4rem)] py-[clamp(1.75rem,3.5vw,2.75rem)]`}
           >
             <div className="order-2 min-w-[300px] flex-1 basis-[420px]">
               <Eyebrow>Before the vote · Civic library</Eyebrow>
-              <h2 className="mt-6 max-w-[15ch] text-[clamp(2rem,4.2vw,3.4rem)] font-bold leading-[1.03] tracking-[-0.025em]">
+              <h2 className="mt-4 max-w-[15ch] text-[clamp(1.6rem,3vw,2.5rem)] font-bold leading-[1.05] tracking-[-0.025em]">
                 Learn what should and shouldn’t happen.
               </h2>
-              <p className="mt-6 max-w-[44ch] text-[clamp(1.05rem,1.35vw,1.28rem)] leading-relaxed text-muted">
+              <p className="mt-4 max-w-[44ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-relaxed text-muted">
                 Clear, plain-English articles on your rights, how accreditation works, and what
                 counts as malpractice, so you arrive knowing what to expect.
               </p>
               <a
                 href="#dashboard"
-                className="mt-7 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
+                className="mt-5 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
               >
                 Open the civic library
               </a>
@@ -151,7 +142,7 @@ export default function Home() {
                       {a.title}
                     </p>
                     <span className="absolute bottom-4 left-5 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-ink/50">
-                      Read
+                      Read <span aria-hidden>→</span>
                     </span>
                   </article>
                 ))}
@@ -160,7 +151,7 @@ export default function Home() {
           </section>
         </Reveal>
 
-        {/*On the day — LGA ratings ───────────────────────── */}
+        {/*On the day — LGA ratings */}
         <Reveal>
         <section
           id="ratings"
@@ -225,7 +216,7 @@ export default function Home() {
         </section>
         </Reveal>
 
-        {/* How you know it's real — the trust mechanism ───── */}
+        {/* How you know it's real — the trust mechanism */}
         <Reveal>
           <section id="verify" className={`${SECTION_X} py-[clamp(3.5rem,8vw,6.5rem)]`}>
             <div className="max-w-[640px]">
@@ -233,23 +224,25 @@ export default function Home() {
               <h2 className="mt-5 max-w-[16ch] text-[clamp(2rem,4.2vw,3.4rem)] font-bold leading-[1.03] tracking-[-0.025em]">
                 A record you can check yourself.
               </h2>
+              <p className="mt-6 max-w-[52ch] text-[clamp(1.05rem,1.35vw,1.28rem)] leading-relaxed text-muted">
+                Fair Nigeria is a parallel, independent record, not a replacement for INEC. It is
+                built so anyone can trace a published number back to the paper it came from.
+              </p>
             </div>
 
-            <Reveal group className="mt-[clamp(2rem,4vw,3.25rem)] grid gap-4 sm:grid-cols-3">
+            <ol className="mt-[clamp(2rem,4vw,3.25rem)] grid gap-px overflow-hidden rounded-2xl border border-ink/12 bg-ink/12 sm:grid-cols-3">
               {VERIFY_STEPS.map((s) => (
-                <div
-                  key={s.title}
-                  className="flex flex-col items-center rounded-2xl border border-ink/12 bg-white/70 p-7 text-center shadow-[0_10px_28px_rgba(15,31,23,0.06)]"
-                >
-                  <h3 className="text-[1.2rem] font-bold tracking-[-0.01em]">{s.title}</h3>
-                  <p className="mt-3 max-w-[30ch] text-[0.98rem] leading-relaxed text-muted">{s.body}</p>
-                </div>
+                <li key={s.n} className="bg-cream p-6 md:p-7">
+                  <span className="font-mono text-[0.8rem] font-semibold text-leaf">{s.n}</span>
+                  <h3 className="mt-3 text-[1.15rem] font-bold tracking-[-0.01em]">{s.title}</h3>
+                  <p className="mt-2.5 text-[0.98rem] leading-relaxed text-muted">{s.body}</p>
+                </li>
               ))}
-            </Reveal>
+            </ol>
           </section>
         </Reveal>
 
-        {/* After the vote — Live results ──────────────────── */}
+        {/* After the vote — Live results */}
         <Reveal>
         <section
           id="results"
@@ -293,11 +286,12 @@ export default function Home() {
         </section>
         </Reveal>
 
-        {/* Closing CTA ────────────────────────────────────── */}
+        {/* Closing CTA  */}
         <Reveal>
         <section id="dashboard" className={`${SECTION_X} py-[clamp(5rem,12vw,10rem)] text-center`}>
           <div className="mx-auto max-w-[700px]">
-            <span className="mb-7 inline-flex items-center font-mono text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-leaf">
+            <span className="mb-7 inline-flex items-center gap-2 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-leaf">
+              <span className="inline-block h-px w-6 bg-ink/25" aria-hidden />
               Be the record
             </span>
             <h2 className="mx-auto max-w-[14ch] text-[clamp(2.5rem,6vw,4.8rem)] font-extrabold leading-[1.02] tracking-[-0.035em] [text-wrap:balance]">
@@ -309,7 +303,7 @@ export default function Home() {
               href="#civic"
               className="inline-flex items-center gap-2 rounded-full bg-ink px-8 py-4 font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-lime hover:text-ink"
             >
-              Know your power
+              Know your power <span aria-hidden>→</span>
             </a>
             <a
               href="#results"
