@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
+import { SessionProvider } from '@/lib/session/SessionProvider';
 import './globals.css';
 
 const display = Bricolage_Grotesque({
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        {children}
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

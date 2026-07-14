@@ -31,3 +31,46 @@ export interface StateOption {
   alias: string;
   zone: string;
 }
+
+// An LGA within a state (for the rating location cascade).
+export interface Lga {
+  id: string;
+  stateId: string;
+  name: string;
+}
+
+export type ElectionStatus = 'upcoming' | 'active' | 'concluded';
+
+export interface Election {
+  id: string;
+  name: string;
+  type: string;
+  electionDate: string;
+  status: ElectionStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// A citizen's submitted rating
+export interface Rating {
+  id: string;
+  electionId: string;
+  lgaId: string;
+  noIntimidation: boolean;
+  accreditationProper: boolean;
+  votingOrderly: boolean;
+  securityPresent: boolean;
+  witnessedMalpractice: boolean;
+  createdAt: string;
+}
+
+// Body for POST /ratings.
+export interface RatingInput {
+  electionId: string;
+  lgaId: string;
+  noIntimidation: boolean;
+  accreditationProper: boolean;
+  votingOrderly: boolean;
+  securityPresent: boolean;
+  witnessedMalpractice: boolean;
+}

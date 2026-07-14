@@ -22,7 +22,19 @@ interface Envelope<T> {
 }
 
 
-export async function attemptRefresh(): Promise<boolean> {
+
+let inFlightRefresh: Promise<boolean> | null = null;
+
+export function attemptRefresh(): Promise<boolean> {
+  if (!inFlightRefresh) {
+    inFlightRefresh = runRefresh().finally(() => {
+      inFlightRefresh = null;
+    });
+  }
+  return inFlightRefresh;
+}
+
+async function runRefresh(): Promise<boolean> {
   try {
     const res = await fetch(`${BASE_URL}/auth/refresh`, { method: 'POST', credentials: 'include' });
     const body = (await res.json().catch(() => null)) as Envelope<{ accessToken: string }> | null;
@@ -31,7 +43,7 @@ export async function attemptRefresh(): Promise<boolean> {
       return true;
     }
   } catch {
-    // fall through
+    // network error — fall through to failure
   }
   setAccessToken(null);
   return false;

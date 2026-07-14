@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { useSession } from '@/lib/session/SessionProvider';
 import { OtpForm } from './OtpForm';
 
 type Props = {
@@ -12,9 +13,15 @@ type Props = {
 
 export function AuthFlow({ renderFirst }: Props) {
   const router = useRouter();
+  const { signIn } = useSession();
   const [step, setStep] = useState<'first' | 'otp'>('first');
   const [phone, setPhone] = useState('');
   const showOtp = step === 'otp';
+
+  async function handleVerified() {
+    await signIn();
+    router.push('/dashboard');
+  }
 
   const firstRef = useRef<HTMLDivElement>(null);
   const otpRef = useRef<HTMLDivElement>(null);
@@ -51,7 +58,7 @@ export function AuthFlow({ renderFirst }: Props) {
             phone={phone}
             active={showOtp}
             onBack={() => setStep('first')}
-            onVerified={() => router.push('/dashboard')}
+            onVerified={handleVerified}
           />
         </div>
         <div

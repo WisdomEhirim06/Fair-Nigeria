@@ -10,5 +10,18 @@ export {
   requestOtp,
   verifyOtp,
 } from './auth';
-export { listStates } from './geography';
-export type { AccessSession, ApiUser, RegisterResult, Role, StateOption } from './types';
+export { listStates, listLgas } from './geography';
+export { getCurrentElection, listElections } from './elections';
+export { getMyRating, submitRating } from './ratings';
+export type {
+  AccessSession,
+  ApiUser,
+  Election,
+  ElectionStatus,
+  Lga,
+  Rating,
+  RatingInput,
+  RegisterResult,
+  Role,
+  StateOption,
+} from './types';
