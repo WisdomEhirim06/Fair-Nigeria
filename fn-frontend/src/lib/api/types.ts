@@ -74,3 +74,66 @@ export interface RatingInput {
   securityPresent: boolean;
   witnessedMalpractice: boolean;
 }
+
+// Public dashboards
+
+export interface FigureTotals {
+  accreditedVoters: number;
+  totalValidVotes: number;
+  rejectedBallots: number;
+  totalVotesCast: number;
+}
+
+export interface SheetCounts {
+  verified: number;
+  disputed: number;
+  pending: number;
+}
+
+export interface PartyTotal {
+  partyId: string;
+  abbreviation: string;
+  name: string;
+  votes: number;
+}
+
+export interface StateResultSummary {
+  stateId: string;
+  stateName: string;
+  sheetCounts: SheetCounts;
+  figures: FigureTotals;
+  partyTotals: PartyTotal[];
+}
+
+export interface ResultsDashboard {
+  electionId: string;
+  lastUpdated: string | null;
+  sheetCounts: SheetCounts;
+  national: { figures: FigureTotals; partyTotals: PartyTotal[] };
+  byState: StateResultSummary[];
+}
+
+/** Per-question yes-fractions (0–1). */
+export interface RatingScores {
+  noIntimidation: number;
+  accreditationProper: number;
+  votingOrderly: number;
+  securityPresent: number;
+  witnessedMalpractice: number;
+}
+
+export interface LgaRatingSummary {
+  lgaId: string;
+  lgaName: string;
+  stateId: string;
+  stateName: string;
+  count: number;
+  scores: RatingScores;
+}
+
+export interface RatingsDashboard {
+  electionId: string;
+  totalRatings: number;
+  lastUpdated: string | null;
+  byLga: LgaRatingSummary[];
+}

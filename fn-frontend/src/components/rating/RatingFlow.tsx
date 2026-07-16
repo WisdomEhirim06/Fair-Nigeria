@@ -118,7 +118,7 @@ export function RatingFlow({ election, onClose }: { election: Election; onClose:
         </p>
         <div className="mt-7 flex flex-col gap-3">
           <a
-            href="/#results"
+            href="/results"
             className="flex h-12 items-center justify-center rounded-full bg-ink font-semibold text-cream transition hover:bg-lime hover:text-ink"
           >
             View results and ratings

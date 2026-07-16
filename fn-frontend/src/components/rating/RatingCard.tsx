@@ -77,7 +77,7 @@ export function RatingCard({
             </div>
           ))}
         </dl>
-        <a href="/#results" className={CTA}>
+        <a href="/results" className={CTA}>
           View results and ratings
         </a>
       </div>

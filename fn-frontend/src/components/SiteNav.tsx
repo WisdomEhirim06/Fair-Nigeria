@@ -5,7 +5,7 @@ import { useState } from 'react';
 const LINKS = [
   { href: '#turnout', label: 'Rate an Election' },
   { href: '#civic', label: 'Know Your Power' },
-  { href: '#results', label: 'Election Results' },
+  { href: '/results', label: 'Election Results' },
 ];
 
 export function SiteNav() {
@@ -30,7 +30,7 @@ export function SiteNav() {
             </a>
           ))}
           <a
-            href="#dashboard"
+            href="/results"
             className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2 text-[0.82rem] font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-lime hover:text-ink"
           >
             View dashboard
@@ -76,7 +76,7 @@ export function SiteNav() {
               </a>
             ))}
             <a
-              href="#dashboard"
+              href="/results"
               onClick={() => setOpen(false)}
               className="rounded-full bg-ink px-5 py-2.5 text-center font-semibold text-cream"
             >
