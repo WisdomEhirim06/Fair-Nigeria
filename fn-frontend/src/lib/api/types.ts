@@ -41,6 +41,31 @@ export interface Lga {
 
 export type ElectionStatus = 'upcoming' | 'active' | 'concluded';
 
+// Roles a super admin can mint via invite codes (super_admin is seed-only).
+export type ProvisionableRole = 'yiaga_official' | 'yiaga_transcriber';
+
+// Nigeria's six geopolitical zones.
+export type GeopoliticalZone = 'NW' | 'NE' | 'NC' | 'SW' | 'SE' | 'SS';
+
+// An invite code as the admin sees it. Never includes the code hash.
+export interface InviteCode {
+  id: string;
+  role: Role;
+  state: string | null;
+  geopoliticalZone: string | null;
+  maxUses: number;
+  usedCount: number;
+  isActive: boolean;
+  expiresAt: string;
+  createdAt: string;
+}
+
+// Result of minting a code: the plaintext is shown ONCE, here only.
+export interface CreatedInviteCode {
+  code: string;
+  inviteCode: InviteCode;
+}
+
 export interface Election {
   id: string;
   name: string;

@@ -11,7 +11,31 @@ export {
   verifyOtp,
 } from './auth';
 export { listStates, listLgas } from './geography';
-export { getCurrentElection, listElections } from './elections';
+export {
+  getCurrentElection,
+  getElection,
+  listElections,
+  createElection,
+  changeElectionStatus,
+  type CreateElectionInput,
+} from './elections';
+export {
+  listParties,
+  createParty,
+  updateParty,
+  deleteParty,
+  type PartyInput,
+} from './parties';
+export {
+  listInviteCodes,
+  createInviteCode,
+  revokeInviteCode,
+  listUsers,
+  updateUser,
+  type CreateInviteCodeInput,
+  type ListUsersFilters,
+  type UpdateUserInput,
+} from './admin';
 export { getMyRating, submitRating } from './ratings';
 export { getResultsDashboard, getRatingsDashboard } from './dashboard';
 export {
@@ -28,12 +52,16 @@ export type {
   ApiUser,
   AuditEntry,
   Claim,
+  CreatedInviteCode,
   Election,
   ElectionStatus,
   FigureTotals,
+  GeopoliticalZone,
+  InviteCode,
   Lga,
   LgaRatingSummary,
   Party,
+  ProvisionableRole,
   PartyTotal,
   QueueStatus,
   Rating,

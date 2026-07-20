@@ -73,6 +73,9 @@ export async function request<T>(
     if (await attemptRefresh()) return request<T>(path, options, false);
   }
 
+  // No-content success (e.g. DELETE → 204). Nothing to unwrap.
+  if (res.status === 204) return undefined as T;
+
   const body = (await res.json().catch(() => null)) as Envelope<T> | null;
   if (!res.ok || !body?.success) {
     throw new ApiError(
