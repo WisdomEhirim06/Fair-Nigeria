@@ -137,3 +137,72 @@ export interface RatingsDashboard {
   lastUpdated: string | null;
   byLga: LgaRatingSummary[];
 }
+
+export type SheetStatus = 'pending' | 'verified' | 'disputed';
+
+// An uploaded EC8A result sheet. Never exposes the uploader's identity.
+export interface Sheet {
+  id: string;
+  electionId: string;
+  stateId: string;
+  lgaId: string;
+  puCode: string;
+  fileHash: string;
+  fileUrl: string | null;
+  mimeType: string;
+  fileSize: number;
+  status: SheetStatus;
+  flagCount: number;
+  createdAt: string;
+}
+
+// A party configured for an election (shown to the transcriber as vote inputs).
+export interface Party {
+  id: string;
+  electionId: string;
+  name: string;
+  abbreviation: string;
+  candidateName: string | null;
+  createdAt: string;
+}
+
+// The sheet + parties handed to a transcriber by POST /transcription/claim.
+export interface Claim {
+  sheet: Sheet;
+  parties: Party[];
+}
+
+// How many sheets await this transcriber. Count only — never which sheets.
+export interface QueueStatus {
+  waiting: number;
+}
+
+// Body for POST /transcription/entries — one reading of a sheet's figures.
+export interface TranscriptionInput {
+  sheetId: string;
+  accreditedVoters: number;
+  totalValidVotes: number;
+  rejectedBallots: number;
+  totalVotesCast: number;
+  partyVotes: Record<string, number>;
+}
+
+// Confirmation returned after a reading is accepted.
+export interface TranscriptionResult {
+  id: string;
+  sheetId: string;
+  figureHash: string;
+  createdAt: string;
+  sheetStatus: SheetStatus;
+}
+
+// A public audit-trail entry. Sanitised — role only, never the actor's id or IP.
+export interface AuditEntry {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  actorRole: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}

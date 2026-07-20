@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { homePathFor } from '@/lib/auth/roles';
 import { useSession } from '@/lib/session/SessionProvider';
 import { OtpForm } from './OtpForm';
 
@@ -19,8 +20,8 @@ export function AuthFlow({ renderFirst }: Props) {
   const showOtp = step === 'otp';
 
   async function handleVerified() {
-    await signIn();
-    router.push('/dashboard');
+    const user = await signIn();
+    router.push(homePathFor(user?.role));
   }
 
   const firstRef = useRef<HTMLDivElement>(null);

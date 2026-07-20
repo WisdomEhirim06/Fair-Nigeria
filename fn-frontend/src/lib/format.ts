@@ -3,6 +3,19 @@
 export function formatNumber(n: number): string {
   return Math.round(n).toLocaleString('en-NG');
 }
+/** Relative time without the "updated" prefix — e.g. "just now", "3 minutes ago". */
+export function timeAgo(iso: string, now: number): string {
+  const min = Math.floor(Math.max(0, now - new Date(iso).getTime()) / 60_000);
+  if (min < 1) return 'just now';
+  if (min === 1) return '1 minute ago';
+  if (min < 60) return `${min} minutes ago`;
+  const hr = Math.floor(min / 60);
+  if (hr === 1) return '1 hour ago';
+  if (hr < 24) return `${hr} hours ago`;
+  const day = Math.floor(hr / 24);
+  return day === 1 ? '1 day ago' : `${day} days ago`;
+}
+
 export function updatedAgo(iso: string | null, now: number): string {
   if (!iso) return 'awaiting first update';
 

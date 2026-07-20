@@ -55,11 +55,14 @@ export async function request<T>(
   allowRetry = true,
 ): Promise<T> {
   const token = getAccessToken();
+  // Let the browser set the multipart boundary for FormData; only default to
+  // JSON for regular bodies.
+  const isFormData = options.body instanceof FormData;
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },

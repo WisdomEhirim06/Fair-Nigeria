@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 
 import type { Role } from '@/lib/api';
+import { homePathFor } from '@/lib/auth/roles';
 import { useSession } from '@/lib/session/SessionProvider';
 
 
@@ -16,11 +17,11 @@ export function RequireAuth({ children, roles }: { children: ReactNode; roles?: 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.replace('/login');
-    } else if (wrongRole) {
-      // Signed in but not allowed here — send to their home.
-      router.replace('/dashboard');
+    } else if (wrongRole && user) {
+      // Signed in but not allowed here — send them to their own home.
+      router.replace(homePathFor(user.role));
     }
-  }, [status, wrongRole, router]);
+  }, [status, wrongRole, user, router]);
 
   if (status !== 'authenticated' || wrongRole) {
     return <AuthLoading />;

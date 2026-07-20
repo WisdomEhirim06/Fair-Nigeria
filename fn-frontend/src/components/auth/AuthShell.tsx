@@ -29,11 +29,13 @@ export function AuthShell({ children, quote }: { children: ReactNode; quote?: Re
         </div>
       </aside>
 
-      {/* Right side of the screen, contains form */}
-      <section className="relative flex min-h-screen flex-col justify-center bg-cream px-6 py-16 sm:px-10 md:bg-white md:px-[clamp(2rem,5vw,5rem)] md:py-10">
-        <a href="/" className="absolute left-6 top-7 flex items-center gap-2.5 sm:left-10 md:hidden">
+      {/* Right side of the screen, contains form.
+          Mobile starts the form near the top rather than centring it in the
+          viewport, which otherwise pushes it far down the screen. */}
+      <section className="relative flex min-h-screen flex-col justify-start bg-cream px-6 pb-12 pt-20 sm:px-10 md:justify-center md:bg-white md:px-[clamp(2rem,5vw,5rem)] md:py-10">
+        <a href="/" className="absolute left-6 top-6 flex items-center gap-2.5 sm:left-10 md:hidden">
           <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
-          <span className="text-[1.05rem] font-bold">Fair Nigeria</span>
+          <span className="text-[1.02rem] font-bold">Fair Nigeria</span>
         </a>
         <div className="mx-auto w-full max-w-[420px]">{children}</div>
       </section>

@@ -20,8 +20,12 @@ function Eyebrow({ children, light = false }: { children: ReactNode; light?: boo
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <div className="text-[clamp(1.6rem,3vw,2.4rem)] font-extrabold tracking-[-0.03em]">{value}</div>
-      <div className="mt-1.5 text-[0.85rem] font-medium tracking-wide text-muted">{label}</div>
+      <div className="text-[clamp(1.15rem,4.6vw,2.4rem)] font-extrabold tracking-[-0.03em]">
+        {value}
+      </div>
+      <div className="mt-1.5 text-[0.72rem] font-medium leading-snug tracking-wide text-muted sm:text-[0.85rem]">
+        {label}
+      </div>
     </div>
   );
 }
@@ -48,10 +52,12 @@ const RESULTS = [
   { name: 'Others', pct: '6.2%', width: 6.2, fill: 'rgba(235,237,224,0.45)' },
 ];
 
+// A real sequence — each step only happens after the one before it — so the
+// numbering carries information rather than decorating.
 const VERIFY_STEPS = [
-  { title: 'Officers upload', body: 'Field officers upload the result sheets from each polling unit.' },
-  { title: 'People verify', body: 'Two or three people check every sheet before it counts.' },
-  { title: 'Everyone can see', body: 'Open the public log of every action, anytime.' },
+  { n: '01', title: 'Officers upload', body: 'Field officers upload the result sheets from each polling unit.' },
+  { n: '02', title: 'People verify', body: 'Two or three people check every sheet before it counts.' },
+  { n: '03', title: 'Everyone can see', body: 'Open the public log of every action, anytime.' },
 ];
 
 export default function Home() {
@@ -63,7 +69,10 @@ export default function Home() {
 
         {/*The 2023 record */}
         <Reveal>
-          <section id="turnout" className={`${SECTION_X} py-[clamp(1.75rem,3.5vw,2.75rem)]`}>
+          <section
+            id="turnout"
+            className={`${SECTION_X} py-14 md:py-[clamp(1.75rem,3.5vw,2.75rem)]`}
+          >
             <Eyebrow>The 2023 record</Eyebrow>
             <h2 className="mt-4 max-w-[20ch] text-[clamp(1.7rem,3.4vw,2.7rem)] font-extrabold leading-[1.03] tracking-[-0.03em]">
               Your decision matters more than the numbers suggest.
@@ -81,9 +90,10 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Three across at every width — the desktop composition holds on mobile. */}
             <Reveal
               group
-              className="mt-[clamp(1.25rem,3vw,2rem)] grid gap-[clamp(1.25rem,3vw,2.5rem)] border-t border-ink/10 pt-[clamp(1rem,2.5vw,1.75rem)] sm:grid-cols-3"
+              className="mt-[clamp(1.5rem,3vw,2rem)] grid grid-cols-3 gap-4 border-t border-ink/10 pt-[clamp(1.25rem,2.5vw,1.75rem)] sm:gap-[clamp(1.25rem,3vw,2.5rem)]"
             >
               <Stat value="93.4M" label="registered voters" />
               <Stat value="24.9M" label="actually voted" />
@@ -96,7 +106,7 @@ export default function Home() {
         <Reveal>
           <section
             id="civic"
-            className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2rem,5vw,4rem)] py-[clamp(1.75rem,3.5vw,2.75rem)]`}
+            className={`${SECTION_X} flex flex-wrap items-center gap-10 py-14 md:gap-[clamp(2rem,5vw,4rem)] md:py-[clamp(1.75rem,3.5vw,2.75rem)]`}
           >
             <div className="order-2 min-w-[300px] flex-1 basis-[420px]">
               <Eyebrow>Before the vote · Civic library</Eyebrow>
@@ -155,7 +165,7 @@ export default function Home() {
         <Reveal>
         <section
           id="ratings"
-          className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] pb-[clamp(4rem,10vw,9rem)]`}
+          className={`${SECTION_X} flex flex-wrap items-center gap-12 pb-[clamp(4rem,10vw,9rem)] pt-4 md:gap-[clamp(2.5rem,6vw,6rem)] md:pt-0`}
         >
           <div className="min-w-[300px] flex-1 basis-[420px]">
             <Eyebrow>On the day · Ratings</Eyebrow>

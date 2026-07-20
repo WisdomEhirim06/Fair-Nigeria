@@ -16,7 +16,8 @@ export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 interface SessionValue {
   user: ApiUser | null;
   status: SessionStatus;
-  signIn: () => Promise<void>;
+  /** Loads the freshly-signed-in user and returns it, so callers can route by role. */
+  signIn: () => Promise<ApiUser | null>;
   signOut: () => Promise<void>;
 }
 
@@ -26,13 +27,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<ApiUser | null>(null);
   const [status, setStatus] = useState<SessionStatus>('loading');
 
-  const loadUser = useCallback(async () => {
+  const loadUser = useCallback(async (): Promise<ApiUser | null> => {
     try {
-      setUser(await getMe());
+      const me = await getMe();
+      setUser(me);
       setStatus('authenticated');
+      return me;
     } catch {
       setUser(null);
       setStatus('unauthenticated');
+      return null;
     }
   }, []);
 
@@ -51,9 +55,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     };
   }, [loadUser]);
 
-  const signIn = useCallback(async () => {
+  const signIn = useCallback(async (): Promise<ApiUser | null> => {
     setStatus('loading');
-    await loadUser();
+    return loadUser();
   }, [loadUser]);
 
   const signOut = useCallback(async () => {
