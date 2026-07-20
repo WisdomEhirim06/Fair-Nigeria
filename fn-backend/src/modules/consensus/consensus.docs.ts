@@ -1,8 +1,14 @@
 import { authErrors, commonErrors, jsonError, jsonOk } from '../../shared/openapi/helpers';
 import { registry } from '../../shared/openapi/registry';
-import { claimSchema, submitEntryBodySchema, submitEntryResultSchema } from './consensus.schemas';
+import {
+  claimSchema,
+  queueStatusSchema,
+  submitEntryBodySchema,
+  submitEntryResultSchema,
+} from './consensus.schemas';
 
 const Claim = registry.register('Claim', claimSchema);
+const QueueStatus = registry.register('QueueStatus', queueStatusSchema);
 const SubmitEntryResult = registry.register('SubmitEntryResult', submitEntryResultSchema);
 
 const SubmitEntryRequest = registry.register(
@@ -21,6 +27,23 @@ const SubmitEntryRequest = registry.register(
     },
   }),
 );
+
+registry.registerPath({
+  method: 'get',
+  path: '/api/v1/transcription/queue',
+  tags: ['Transcription'],
+  summary: 'Count sheets awaiting me',
+  description:
+    'How many sheets the signed-in transcriber could be handed right now. Returns a ' +
+    'count only — never which sheets — so it cannot be used to pick a specific one. ' +
+    'Transcriber only.',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    200: jsonOk(QueueStatus, 'The number of sheets waiting.'),
+    ...authErrors(),
+    ...commonErrors(),
+  },
+});
 
 registry.registerPath({
   method: 'post',

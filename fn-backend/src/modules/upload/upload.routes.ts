@@ -7,6 +7,7 @@ import { validate } from '../../shared/middleware/validate';
 import {
   flagSheetHandler,
   getSheetHandler,
+  listMyUploadsHandler,
   listSheetsHandler,
   uploadSheetHandler,
 } from './upload.controller';
@@ -14,6 +15,9 @@ import { flagSheetBodySchema, sheetIdParamSchema } from './upload.schemas';
 
 // /api/v1/upload — write side (Yiaga officials).
 export const uploadRouter = Router();
+
+// The officer's own uploads. Auth-scoped, since the public list hides uploaders.
+uploadRouter.get('/mine', requireAuth, requireRole('yiaga_official'), listMyUploadsHandler);
 
 // Multipart body is parsed by busboy in the handler, so no body validator here.
 uploadRouter.post('/', requireAuth, requireRole('yiaga_official'), uploadSheetHandler);

@@ -52,6 +52,31 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'get',
+  path: '/api/v1/upload/mine',
+  tags: ['Sheets'],
+  summary: "List the officer's own uploads",
+  description:
+    'Paginated list of sheets uploaded by the signed-in officer, newest first. ' +
+    'Yiaga official only — the public list never reveals the uploader.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    query: z.object({
+      page: z.coerce.number().int().min(1).optional(),
+      limit: z.coerce.number().int().min(1).max(100).optional(),
+      electionId: z.string().uuid().optional(),
+      lgaId: z.string().uuid().optional(),
+      status: z.enum(['pending', 'verified', 'disputed']).optional(),
+    }),
+  },
+  responses: {
+    200: jsonOk(z.array(Sheet), 'Your uploaded sheets.'),
+    ...authErrors(),
+    ...commonErrors(),
+  },
+});
+
+registry.registerPath({
+  method: 'get',
   path: '/api/v1/sheets',
   tags: ['Sheets'],
   summary: 'List sheets',

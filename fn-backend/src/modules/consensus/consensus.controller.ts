@@ -1,12 +1,22 @@
 import type { RequestHandler } from 'express';
 
 import { successEnvelope } from '../../shared/response';
-import { claimNextSheet, submitEntry } from './consensus.service';
+import { claimNextSheet, countAvailableSheets, submitEntry } from './consensus.service';
 import type { SubmitEntryInput } from './consensus.schemas';
 
 function reqId(req: Parameters<RequestHandler>[0]): string {
   return req.id as unknown as string;
 }
+
+/** GET /transcription/queue — how many sheets await this transcriber. */
+export const queueStatusHandler: RequestHandler = async (req, res, next) => {
+  try {
+    const waiting = await countAvailableSheets(req.user!.id);
+    res.json(successEnvelope({ waiting }, reqId(req)));
+  } catch (err) {
+    next(err);
+  }
+};
 
 /** POST /transcription/claim — hand the transcriber their next sheet (pull model). */
 export const claimSheetHandler: RequestHandler = async (req, res, next) => {

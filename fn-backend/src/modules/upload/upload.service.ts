@@ -148,6 +148,40 @@ export async function listSheets(
   };
 }
 
+
+export async function listMySheets(
+  uploaderId: string,
+  query: ListSheetsQuery,
+): Promise<{ sheets: PublicSheet[]; pagination: Pagination }> {
+  const filters = [
+    eq(sheets.uploadedBy, uploaderId),
+    query.electionId ? eq(sheets.electionId, query.electionId) : undefined,
+    query.lgaId ? eq(sheets.lgaId, query.lgaId) : undefined,
+    query.status ? eq(sheets.status, query.status) : undefined,
+  ].filter(Boolean);
+  const where = and(...filters);
+
+  const [{ total }] = await appDb.select({ total: count() }).from(sheets).where(where);
+
+  const rows = await appDb
+    .select()
+    .from(sheets)
+    .where(where)
+    .orderBy(desc(sheets.createdAt))
+    .limit(query.limit)
+    .offset((query.page - 1) * query.limit);
+
+  return {
+    sheets: rows.map(toPublicSheet),
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      hasNext: query.page * query.limit < total,
+    },
+  };
+}
+
 export async function getSheet(id: string): Promise<PublicSheet> {
   const [row] = await appDb.select().from(sheets).where(eq(sheets.id, id)).limit(1);
   if (!row) {

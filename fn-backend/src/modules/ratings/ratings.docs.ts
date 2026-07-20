@@ -27,7 +27,8 @@ registry.registerPath({
   tags: ['Ratings'],
   summary: 'Submit a rating',
   description:
-    'Records the authenticated citizen’s rating for an election.',
+    'Records the signed-in person’s rating for an election. Open to every role — ' +
+    'staff are citizens too. One rating per person per election.',
   security: [{ bearerAuth: [] }],
   request: {
     body: { required: true, content: { 'application/json': { schema: SubmitRatingRequest } } },
@@ -48,9 +49,9 @@ registry.registerPath({
   tags: ['Ratings'],
   summary: 'Get my rating',
   description:
-    'Returns the authenticated citizen’s own rating for the given election, or 404 if ' +
+    'Returns the signed-in person’s own rating for the given election, or 404 if ' +
     'they have not rated it yet. Lets the UI choose between the form and the submitted ' +
-    'state. Citizen role only.',
+    'state. Open to every role.',
   security: [{ bearerAuth: [] }],
   request: { query: z.object({ electionId: z.string().uuid() }) },
   responses: {

@@ -39,6 +39,13 @@ export const submitEntryResultSchema = z.object({
 
 export type SubmitEntryResult = z.infer<typeof submitEntryResultSchema>;
 
+/** How many sheets are waiting for this transcriber. Powers the start screen. */
+export const queueStatusSchema = z.object({
+  waiting: z.number().int().min(0),
+});
+
+export type QueueStatus = z.infer<typeof queueStatusSchema>;
+
 /** The next sheet handed to a transcriber, with the parties whose votes to enter. */
 export const claimSchema = z.object({
   sheet: sheetSchema,

@@ -44,6 +44,37 @@ async function partiesForSheet(electionId: string): Promise<ClaimResult['parties
 }
 
 
+/**
+ * How many sheets this transcriber could be handed right now.
+ *
+ * Mirrors the eligibility rules in claimNextSheet (pending, not their own
+ * upload, not already read by them, still short of MAX_ENTRIES) so the start
+ * screen can show a truthful count without revealing which sheets they are.
+ */
+export async function countAvailableSheets(transcriberId: string): Promise<number> {
+  const mine = alias(transcriptionEntries, 'mine');
+  const rows = await appDb
+    .select({ id: sheets.id })
+    .from(sheets)
+    .leftJoin(transcriptionEntries, eq(transcriptionEntries.sheetId, sheets.id))
+    .where(
+      and(
+        eq(sheets.status, 'pending'),
+        ne(sheets.uploadedBy, transcriberId),
+        notExists(
+          appDb
+            .select({ one: sql`1` })
+            .from(mine)
+            .where(and(eq(mine.sheetId, sheets.id), eq(mine.transcriberId, transcriberId))),
+        ),
+      ),
+    )
+    .groupBy(sheets.id)
+    .having(sql`count(${transcriptionEntries.id}) < ${MAX_ENTRIES}`);
+
+  return rows.length;
+}
+
 export async function claimNextSheet(transcriberId: string): Promise<ClaimResult> {
   const redis = getRedis();
 
