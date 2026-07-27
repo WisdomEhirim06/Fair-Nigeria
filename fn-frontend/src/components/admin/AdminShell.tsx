@@ -16,6 +16,7 @@ interface Item {
 const NAV: Item[] = [
   { href: '/admin', label: 'Overview', icon: 'overview' },
   { href: '/admin/elections', label: 'Elections', icon: 'elections' },
+  { href: '/admin/articles', label: 'Articles', icon: 'articles' },
   { href: '/admin/invites', label: 'Invite codes', icon: 'invites' },
   { href: '/admin/users', label: 'Users', icon: 'users' },
 ];

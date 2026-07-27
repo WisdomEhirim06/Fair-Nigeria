@@ -163,6 +163,32 @@ export interface RatingsDashboard {
   byLga: LgaRatingSummary[];
 }
 
+// Civic library articles.
+export type ArticleCategory =
+  | 'voter_rights'
+  | 'accreditation'
+  | 'malpractice'
+  | 'reporting'
+  | 'civic_general';
+
+/** List shape — no body. */
+export interface ArticleSummary {
+  id: string;
+  slug: string;
+  title: string;
+  category: ArticleCategory;
+  excerpt: string | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Full article, including the Markdown body. */
+export interface Article extends ArticleSummary {
+  body: string;
+}
+
 export type SheetStatus = 'pending' | 'verified' | 'disputed';
 
 // An uploaded EC8A result sheet. Never exposes the uploader's identity.

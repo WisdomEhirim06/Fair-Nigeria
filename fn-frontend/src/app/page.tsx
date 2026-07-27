@@ -52,8 +52,6 @@ const RESULTS = [
   { name: 'Others', pct: '6.2%', width: 6.2, fill: 'rgba(235,237,224,0.45)' },
 ];
 
-// A real sequence — each step only happens after the one before it — so the
-// numbering carries information rather than decorating.
 const VERIFY_STEPS = [
   { n: '01', title: 'Officers upload', body: 'Field officers upload the result sheets from each polling unit.' },
   { n: '02', title: 'People verify', body: 'Two or three people check every sheet before it counts.' },
@@ -118,7 +116,7 @@ export default function Home() {
                 counts as malpractice, so you arrive knowing what to expect.
               </p>
               <a
-                href="#dashboard"
+                href="/articles"
                 className="mt-5 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
               >
                 Open the civic library

@@ -26,6 +26,7 @@ import {
 import { roleLabel } from '@/components/admin/format';
 
 const ROLES: Role[] = ['citizen', 'yiaga_official', 'yiaga_transcriber', 'super_admin'];
+const ASSIGNABLE_ROLES: Role[] = ['citizen', 'yiaga_official', 'yiaga_transcriber'];
 const ZONES: GeopoliticalZone[] = ['NW', 'NE', 'NC', 'SW', 'SE', 'SS'];
 
 export default function UsersPage() {
@@ -159,14 +160,21 @@ function EditUserModal({
   return (
     <Modal title={user.fullName} onClose={onClose}>
       <div className="flex flex-col gap-4">
-        <Field label="Role">
-          <select className={selectClass} value={role} onChange={(e) => setRole(e.target.value as Role)}>
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {roleLabel(r)}
-              </option>
-            ))}
-          </select>
+        <Field
+          label="Role"
+          hint={user.role === 'super_admin' ? 'Administrator accounts can’t be reassigned here.' : undefined}
+        >
+          {user.role === 'super_admin' ? (
+            <input className={inputClass} value={roleLabel('super_admin')} disabled readOnly />
+          ) : (
+            <select className={selectClass} value={role} onChange={(e) => setRole(e.target.value as Role)}>
+              {ASSIGNABLE_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {roleLabel(r)}
+                </option>
+              ))}
+            </select>
+          )}
         </Field>
 
         <label className="flex items-center justify-between rounded-xl border border-ink/15 bg-white px-4 py-3">

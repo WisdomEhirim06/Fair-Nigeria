@@ -36,6 +36,18 @@ export {
   type ListUsersFilters,
   type UpdateUserInput,
 } from './admin';
+export {
+  listArticles,
+  getArticle,
+  listAllArticles,
+  getArticleById,
+  createArticle,
+  updateArticle,
+  setArticlePublished,
+  deleteArticle,
+  type CreateArticleInput,
+  type UpdateArticleInput,
+} from './content';
 export { getMyRating, submitRating } from './ratings';
 export { getResultsDashboard, getRatingsDashboard } from './dashboard';
 export {
@@ -50,6 +62,9 @@ export { listAudit, type AuditFilters } from './audit';
 export type {
   AccessSession,
   ApiUser,
+  Article,
+  ArticleCategory,
+  ArticleSummary,
   AuditEntry,
   Claim,
   CreatedInviteCode,
