@@ -53,9 +53,13 @@ export { getResultsDashboard, getRatingsDashboard } from './dashboard';
 export {
   uploadSheet,
   listMyUploads,
+  listSheets,
+  getSheet,
+  getSheetResult,
   flagSheet,
   type UploadSheetInput,
   type MyUploadsFilters,
+  type SheetFilters,
 } from './sheets';
 export { claimNextSheet, getQueueStatus, submitEntry } from './transcription';
 export { listAudit, type AuditFilters } from './audit';
@@ -88,6 +92,8 @@ export type {
   Role,
   Sheet,
   SheetCounts,
+  SheetPartyVote,
+  SheetResult,
   SheetStatus,
   StateOption,
   StateResultSummary,

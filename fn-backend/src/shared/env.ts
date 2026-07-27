@@ -29,11 +29,12 @@ const envSchema = z.object({
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET_NAME: z.string().optional(),
-  // Public base URL the immutable bucket is served from (CDN or r2.dev domain),
-  // e.g. https://sheets.fairnigeria.org. Used to build each sheet's public URL.
   R2_PUBLIC_BASE_URL: z.string().url().optional(),
+  R2_IMAGE_RESIZING: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 
-  // Largest EC8A upload accepted, in bytes. Default 10 MB.
   UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(10_485_760),
 
   FCM_SERVICE_ACCOUNT_B64: z.string().optional(),

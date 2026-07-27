@@ -247,6 +247,28 @@ export interface TranscriptionResult {
   sheetStatus: SheetStatus;
 }
 
+// One party's vote count as read off a specific sheet.
+export interface SheetPartyVote {
+  partyId: string;
+  abbreviation: string;
+  name: string;
+  candidateName: string | null;
+  votes: number;
+}
+
+// The agreed figures published from a verified sheet.
+export interface SheetResult {
+  sheetId: string;
+  puCode: string;
+  accreditedVoters: number;
+  totalValidVotes: number;
+  rejectedBallots: number;
+  totalVotesCast: number;
+  partyVotes: SheetPartyVote[];
+  agreedReadings: number;
+  createdAt: string;
+}
+
 // A public audit-trail entry. Sanitised — role only, never the actor's id or IP.
 export interface AuditEntry {
   id: string;

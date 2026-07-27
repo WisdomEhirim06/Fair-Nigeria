@@ -38,8 +38,9 @@ const ENTITY_OPTIONS = ['election', 'sheet', 'article'];
 function actionLabel(action: string) {
   return ACTION_LABELS[action] ?? action.replace(/[._]/g, ' ');
 }
+
 function roleLabel(role: string | null) {
-  return role ? (ROLE_LABELS[role] ?? role) : 'System';
+  return role ? (ROLE_LABELS[role] ?? role) : 'Member of the public';
 }
 function categoryColor(action: string) {
   switch (action.split('.')[0]) {
@@ -208,6 +209,16 @@ export function AuditViewer() {
                           {roleLabel(e.actorRole)}
                         </span>
                         <span className="capitalize">{e.entityType}</span>
+                        {/* Sheet entries link through to the paper itself. The id
+                            builds the link but is never shown. */}
+                        {e.entityType === 'sheet' && e.entityId ? (
+                          <a
+                            href={`/sheets/${e.entityId}`}
+                            className="font-medium text-leaf transition-colors hover:text-forest-deep"
+                          >
+                            View this sheet
+                          </a>
+                        ) : null}
                       </div>
                       {e.metadata && Object.keys(e.metadata).length > 0 ? (
                         <details className="mt-2">
