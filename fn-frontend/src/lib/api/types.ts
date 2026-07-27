@@ -200,6 +200,7 @@ export interface Sheet {
   puCode: string;
   fileHash: string;
   fileUrl: string | null;
+  thumbUrl: string | null;
   mimeType: string;
   fileSize: number;
   status: SheetStatus;
