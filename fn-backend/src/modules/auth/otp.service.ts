@@ -8,7 +8,7 @@ import { AppError } from '../../shared/errors';
 import { signAccessToken } from '../../shared/jwt';
 import { logger } from '../../shared/logger';
 import { getRedis } from '../../shared/redis';
-import { sendOtpSms } from '../sms/sms.service';
+import { sendOtpEmail } from '../email/email.service';
 import type { RequestOtpInput, VerifyOtpInput } from './otp.schemas';
 
 /** Redis key namespace for pending OTPs. */
@@ -23,7 +23,7 @@ export async function requestOtp(input: RequestOtpInput): Promise<void> {
 
   // Verify the phone belongs to a registered, active citizen before issuing an OTP.
   const [user] = await authDb
-    .select({ id: users.id })
+    .select({ id: users.id, email: users.email })
     .from(users)
     .where(and(eq(users.phoneNumber, input.phoneNumber), eq(users.isActive, true)))
     .limit(1);
@@ -48,7 +48,7 @@ export async function requestOtp(input: RequestOtpInput): Promise<void> {
     expiresAt,
   });
 
-  await sendOtpSms(input.phoneNumber, code);
+  await sendOtpEmail(user.email, code);
 }
 
 // OTP verify + token

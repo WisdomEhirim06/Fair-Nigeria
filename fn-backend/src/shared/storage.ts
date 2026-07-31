@@ -61,3 +61,17 @@ export function publicUrlFor(key: string): string | null {
   if (!env.R2_PUBLIC_BASE_URL) return null;
   return `${env.R2_PUBLIC_BASE_URL.replace(/\/+$/, '')}/${key}`;
 }
+
+const RESIZABLE_MIME = new Set(['image/jpeg', 'image/png']);
+
+
+export function thumbnailUrlFor(
+  key: string,
+  mimeType: string,
+  width = 400,
+): string | null {
+  if (!env.R2_IMAGE_RESIZING || !env.R2_PUBLIC_BASE_URL) return null;
+  if (!RESIZABLE_MIME.has(mimeType)) return null;
+  const base = env.R2_PUBLIC_BASE_URL.replace(/\/+$/, '');
+  return `${base}/cdn-cgi/image/width=${width},quality=75,format=auto,fit=cover/${key}`;
+}

@@ -1,0 +1,61 @@
+{
+  "name": "Fair Nigeria",
+  "short_name": "Fair Nigeria",
+  "description": "A citizen-led record of the 2027 Nigerian election that anyone can verify: civic knowledge, election ratings, and results you can trace back to.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbfaf6",
+  "theme_color": "#fbfaf6",
+  "lang": "en-NG",
+  "dir": "ltr",
+  "categories": ["news", "government", "education"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Results",
+      "short_name": "Results",
+      "description": "The live count and citizen ratings",
+      "url": "/results"
+    },
+    {
+      "name": "Civic library",
+      "short_name": "Library",
+      "description": "Know your rights before you vote",
+      "url": "/articles"
+    },
+    {
+      "name": "The paper trail",
+      "short_name": "Sheets",
+      "description": "Browse the result sheets behind the count",
+      "url": "/sheets"
+    }
+  ]
+}

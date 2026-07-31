@@ -8,7 +8,14 @@ import { AppError } from '../../shared/errors';
 import { successEnvelope } from '../../shared/response';
 import { isStorageConfigured, putObjectStream } from '../../shared/storage';
 import type { Actor, UploadedFile } from './upload.service';
-import { createSheet, flagSheet, getSheet, listSheets } from './upload.service';
+import {
+  createSheet,
+  flagSheet,
+  getSheet,
+  getSheetResult,
+  listMySheets,
+  listSheets,
+} from './upload.service';
 import {
   EXT_BY_MIME,
   listSheetsQuerySchema,
@@ -137,11 +144,32 @@ export const listSheetsHandler: RequestHandler = async (req, res, next) => {
   }
 };
 
+/** GET /upload/mine — the signed-in officer's own uploads.*/
+export const listMyUploadsHandler: RequestHandler = async (req, res, next) => {
+  try {
+    const query = listSheetsQuerySchema.parse(req.query);
+    const { sheets, pagination } = await listMySheets(req.user!.id, query);
+    res.json(successEnvelope(sheets, reqId(req), pagination));
+  } catch (err) {
+    next(err);
+  }
+};
+
 /** GET /sheets/:id — public single sheet. */
 export const getSheetHandler: RequestHandler = async (req, res, next) => {
   try {
     const sheet = await getSheet((req.params as SheetIdParam).id);
     res.json(successEnvelope(sheet, reqId(req)));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** GET /sheets/:id/result — the agreed figures published from a verified sheet. Public. */
+export const getSheetResultHandler: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await getSheetResult((req.params as SheetIdParam).id);
+    res.json(successEnvelope(result, reqId(req)));
   } catch (err) {
     next(err);
   }

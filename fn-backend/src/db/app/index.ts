@@ -6,7 +6,7 @@ import * as schema from './schema';
 
 
 const client = postgres(env.DATABASE_URL, {
-  ssl: env.NODE_ENV === 'production' ? 'require' : false,
+  ssl: 'prefer',
   max: 10,
   idle_timeout: 30,
   connect_timeout: 10,

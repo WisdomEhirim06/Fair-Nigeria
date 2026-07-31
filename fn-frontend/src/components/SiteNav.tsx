@@ -3,9 +3,9 @@
 import { useState } from 'react';
 
 const LINKS = [
-  { href: '#turnout', label: 'The 2023 Record' },
-  { href: '#civic', label: 'Civic Library' },
-  { href: '#results', label: 'Results' },
+  { href: '#turnout', label: 'Rate an Election' },
+  { href: '#civic', label: 'Know Your Power' },
+  { href: '/results', label: 'Election Results' },
 ];
 
 export function SiteNav() {
@@ -13,30 +13,29 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-cream/85 backdrop-blur">
-      <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-6 px-6 py-5 md:px-[clamp(1.5rem,7vw,7.5rem)]">
+      <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-6 px-6 py-2.5 md:px-[clamp(1.5rem,7vw,7.5rem)]">
         <a href="#top" className="flex items-center gap-2.5">
-          <span className="h-3 w-3 rounded-full bg-lime" aria-hidden />
-          <span className="text-[1.18rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
+          <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+          <span className="text-[1.05rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
         </a>
 
-        <div className="hidden flex-1 items-center justify-center gap-10 md:flex">
+        <div className="hidden items-center gap-7 md:flex">
           {LINKS.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-[0.98rem] font-medium text-ink/70 transition-colors hover:text-ink"
+              className="text-[0.82rem] font-medium text-ink/70 transition-colors hover:text-ink"
             >
               {l.label}
             </a>
           ))}
+          <a
+            href="/results"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2 text-[0.82rem] font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-lime hover:text-ink"
+          >
+            View dashboard
+          </a>
         </div>
-
-        <a
-          href="#dashboard"
-          className="hidden items-center gap-2 rounded-full bg-ink px-6 py-3 text-[0.95rem] font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-lime hover:text-ink md:inline-flex"
-        >
-          View dashboard <span aria-hidden>→</span>
-        </a>
 
         <button
           type="button"
@@ -44,7 +43,7 @@ export function SiteNav() {
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? 'Close menu' : 'Open menu'}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/20 md:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/20 md:hidden"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
             {open ? (
@@ -77,7 +76,7 @@ export function SiteNav() {
               </a>
             ))}
             <a
-              href="#dashboard"
+              href="/results"
               onClick={() => setOpen(false)}
               className="rounded-full bg-ink px-5 py-2.5 text-center font-semibold text-cream"
             >

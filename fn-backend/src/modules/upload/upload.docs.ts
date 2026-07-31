@@ -2,9 +2,15 @@ import { z } from 'zod';
 
 import { authErrors, commonErrors, jsonError, jsonOk } from '../../shared/openapi/helpers';
 import { registry } from '../../shared/openapi/registry';
-import { flagResultSchema, flagSheetBodySchema, sheetSchema } from './upload.schemas';
+import {
+  flagResultSchema,
+  flagSheetBodySchema,
+  sheetResultSchema,
+  sheetSchema,
+} from './upload.schemas';
 
 const Sheet = registry.register('Sheet', sheetSchema);
+const SheetResult = registry.register('SheetResult', sheetResultSchema);
 const FlagResult = registry.register('FlagResult', flagResultSchema);
 
 const FlagSheetRequest = registry.register(
@@ -52,6 +58,32 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'get',
+  path: '/api/v1/upload/mine',
+  tags: ['Sheets'],
+  summary: "List the officer's own uploads",
+  description:
+    'Paginated list of sheets uploaded by the signed-in officer, newest first. ' +
+    'Yiaga official only — the public list never reveals the uploader.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    query: z.object({
+      page: z.coerce.number().int().min(1).optional(),
+      limit: z.coerce.number().int().min(1).max(100).optional(),
+      electionId: z.string().uuid().optional(),
+      stateId: z.string().uuid().optional(),
+      lgaId: z.string().uuid().optional(),
+      status: z.enum(['pending', 'verified', 'disputed']).optional(),
+    }),
+  },
+  responses: {
+    200: jsonOk(z.array(Sheet), 'Your uploaded sheets.'),
+    ...authErrors(),
+    ...commonErrors(),
+  },
+});
+
+registry.registerPath({
+  method: 'get',
   path: '/api/v1/sheets',
   tags: ['Sheets'],
   summary: 'List sheets',
@@ -61,6 +93,7 @@ registry.registerPath({
       page: z.coerce.number().int().min(1).optional(),
       limit: z.coerce.number().int().min(1).max(100).optional(),
       electionId: z.string().uuid().optional(),
+      stateId: z.string().uuid().optional(),
       lgaId: z.string().uuid().optional(),
       status: z.enum(['pending', 'verified', 'disputed']).optional(),
     }),
@@ -81,6 +114,23 @@ registry.registerPath({
   responses: {
     200: jsonOk(Sheet, 'The sheet.'),
     404: jsonError('Sheet not found.'),
+    ...commonErrors(),
+  },
+});
+
+registry.registerPath({
+  method: 'get',
+  path: '/api/v1/sheets/{id}/result',
+  tags: ['Sheets'],
+  summary: 'Get the figures published from a sheet',
+  description:
+    'The agreed figures read off a verified sheet, with party votes resolved to ' +
+    'names. This is how a published number traces back to the paper it came from. ' +
+    'Pending and disputed sheets have no published figures and return 404. Public.',
+  request: { params: z.object({ id: z.string().uuid() }) },
+  responses: {
+    200: jsonOk(SheetResult, 'The published figures.'),
+    404: jsonError('Sheet not found, or no figures published from it yet.'),
     ...commonErrors(),
   },
 });

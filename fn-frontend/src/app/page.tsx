@@ -8,11 +8,10 @@ import { SiteNav } from '@/components/SiteNav';
 function Eyebrow({ children, light = false }: { children: ReactNode; light?: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.22em] ${
+      className={`inline-flex items-center font-mono text-[0.72rem] font-semibold uppercase tracking-[0.22em] ${
         light ? 'text-lime-bright' : 'text-leaf'
       }`}
     >
-      <span className="inline-block h-px w-6 bg-lime" aria-hidden />
       {children}
     </span>
   );
@@ -21,8 +20,12 @@ function Eyebrow({ children, light = false }: { children: ReactNode; light?: boo
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <div className="text-[clamp(2.1rem,4vw,3.4rem)] font-extrabold tracking-[-0.03em]">{value}</div>
-      <div className="mt-1.5 text-[0.95rem] font-medium tracking-wide text-muted">{label}</div>
+      <div className="text-[clamp(1.15rem,4.6vw,2.4rem)] font-extrabold tracking-[-0.03em]">
+        {value}
+      </div>
+      <div className="mt-1.5 text-[0.72rem] font-medium leading-snug tracking-wide text-muted sm:text-[0.85rem]">
+        {label}
+      </div>
     </div>
   );
 }
@@ -49,6 +52,12 @@ const RESULTS = [
   { name: 'Others', pct: '6.2%', width: 6.2, fill: 'rgba(235,237,224,0.45)' },
 ];
 
+const VERIFY_STEPS = [
+  { n: '01', title: 'Officers upload', body: 'Field officers upload the result sheets from each polling unit.' },
+  { n: '02', title: 'People verify', body: 'Two or three people check every sheet before it counts.' },
+  { n: '03', title: 'Everyone can see', body: 'Open the public log of every action, anytime.' },
+];
+
 export default function Home() {
   return (
     <>
@@ -56,29 +65,33 @@ export default function Home() {
       <main id="main">
         <Hero />
 
-        {/* ── The 2023 record ───────────────────────────────── */}
+        {/*The 2023 record */}
         <Reveal>
-          <section id="turnout" className={`${SECTION_X} py-[clamp(3rem,7vw,5.5rem)]`}>
+          <section
+            id="turnout"
+            className={`${SECTION_X} py-14 md:py-[clamp(1.75rem,3.5vw,2.75rem)]`}
+          >
             <Eyebrow>The 2023 record</Eyebrow>
-            <h2 className="mt-5 max-w-[18ch] text-[clamp(2.1rem,5vw,4.2rem)] font-extrabold leading-none tracking-[-0.03em]">
+            <h2 className="mt-4 max-w-[20ch] text-[clamp(1.7rem,3.4vw,2.7rem)] font-extrabold leading-[1.03] tracking-[-0.03em]">
               Your decision matters more than the numbers suggest.
             </h2>
 
-            <div className="mt-[clamp(1.5rem,4vw,3rem)] flex flex-wrap items-end gap-[clamp(1.25rem,4vw,3.5rem)]">
-              <div className="flex items-start font-extrabold leading-[0.82] tracking-[-0.04em] text-lime">
-                <span className="text-[clamp(3.5rem,10vw,8rem)]">26.7</span>
-                <span className="mt-[0.18em] text-[clamp(1.6rem,3.5vw,3.2rem)]">%</span>
+            <div className="mt-[clamp(1rem,3vw,2rem)] flex flex-wrap items-end gap-[clamp(1.25rem,4vw,3rem)]">
+              <div className="flex items-start font-extrabold leading-[0.82] tracking-[-0.04em] text-ink">
+                <span className="text-[clamp(2.6rem,6vw,4.5rem)]">26.7</span>
+                <span className="mt-[0.18em] text-[clamp(1.2rem,2.5vw,2rem)]">%</span>
               </div>
-              <p className="mb-2 max-w-[34ch] text-[clamp(1.05rem,1.5vw,1.4rem)] leading-snug text-muted">
+              <p className="mb-1.5 max-w-[34ch] text-[clamp(1rem,1.4vw,1.25rem)] leading-snug text-muted">
                 of registered voters cast a ballot in the 2023 general election, the{' '}
                 <strong className="font-semibold text-ink">lowest turnout</strong> since the return
                 to democracy in 1999.
               </p>
             </div>
 
+            {/* Three across at every width — the desktop composition holds on mobile. */}
             <Reveal
               group
-              className="mt-[clamp(1.75rem,4vw,3rem)] grid gap-[clamp(1.25rem,3vw,3rem)] border-t border-ink/10 pt-[clamp(1.5rem,3vw,2.25rem)] sm:grid-cols-3"
+              className="mt-[clamp(1.5rem,3vw,2rem)] grid grid-cols-3 gap-4 border-t border-ink/10 pt-[clamp(1.25rem,2.5vw,1.75rem)] sm:gap-[clamp(1.25rem,3vw,2.5rem)]"
             >
               <Stat value="93.4M" label="registered voters" />
               <Stat value="24.9M" label="actually voted" />
@@ -87,26 +100,26 @@ export default function Home() {
           </section>
         </Reveal>
 
-        {/* ── Before the vote — Civic library ────────────────── */}
+        {/* Before the vote — Civic library */}
         <Reveal>
           <section
             id="civic"
-            className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] py-[clamp(4rem,10vw,9rem)]`}
+            className={`${SECTION_X} flex flex-wrap items-center gap-10 py-14 md:gap-[clamp(2rem,5vw,4rem)] md:py-[clamp(1.75rem,3.5vw,2.75rem)]`}
           >
             <div className="order-2 min-w-[300px] flex-1 basis-[420px]">
               <Eyebrow>Before the vote · Civic library</Eyebrow>
-              <h2 className="mt-6 max-w-[15ch] text-[clamp(2rem,4.2vw,3.4rem)] font-bold leading-[1.03] tracking-[-0.025em]">
+              <h2 className="mt-4 max-w-[15ch] text-[clamp(1.6rem,3vw,2.5rem)] font-bold leading-[1.05] tracking-[-0.025em]">
                 Learn what should and shouldn’t happen.
               </h2>
-              <p className="mt-6 max-w-[44ch] text-[clamp(1.05rem,1.35vw,1.28rem)] leading-relaxed text-muted">
+              <p className="mt-4 max-w-[44ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-relaxed text-muted">
                 Clear, plain-English articles on your rights, how accreditation works, and what
                 counts as malpractice, so you arrive knowing what to expect.
               </p>
               <a
-                href="#dashboard"
-                className="mt-7 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
+                href="/articles"
+                className="mt-5 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
               >
-                Open the civic library <span aria-hidden>→</span>
+                Open the civic library
               </a>
             </div>
 
@@ -146,10 +159,11 @@ export default function Home() {
           </section>
         </Reveal>
 
-        {/* ── On the day — LGA ratings ───────────────────────── */}
+        {/*On the day — LGA ratings */}
         <Reveal>
         <section
-          className={`${SECTION_X} flex flex-wrap items-center gap-[clamp(2.5rem,6vw,6rem)] pb-[clamp(4rem,10vw,9rem)]`}
+          id="ratings"
+          className={`${SECTION_X} flex flex-wrap items-center gap-12 pb-[clamp(4rem,10vw,9rem)] pt-4 md:gap-[clamp(2.5rem,6vw,6rem)] md:pt-0`}
         >
           <div className="min-w-[300px] flex-1 basis-[420px]">
             <Eyebrow>On the day · Ratings</Eyebrow>
@@ -210,7 +224,33 @@ export default function Home() {
         </section>
         </Reveal>
 
-        {/* ── After the vote — Live results ──────────────────── */}
+        {/* How you know it's real — the trust mechanism */}
+        <Reveal>
+          <section id="verify" className={`${SECTION_X} py-[clamp(3.5rem,8vw,6.5rem)]`}>
+            <div className="max-w-[640px]">
+              <Eyebrow>How you know it’s real</Eyebrow>
+              <h2 className="mt-5 max-w-[16ch] text-[clamp(2rem,4.2vw,3.4rem)] font-bold leading-[1.03] tracking-[-0.025em]">
+                A record you can check yourself.
+              </h2>
+              <p className="mt-6 max-w-[52ch] text-[clamp(1.05rem,1.35vw,1.28rem)] leading-relaxed text-muted">
+                Fair Nigeria is a parallel, independent record, not a replacement for INEC. It is
+                built so anyone can trace a published number back to the paper it came from.
+              </p>
+            </div>
+
+            <ol className="mt-[clamp(2rem,4vw,3.25rem)] grid gap-px overflow-hidden rounded-2xl border border-ink/12 bg-ink/12 sm:grid-cols-3">
+              {VERIFY_STEPS.map((s) => (
+                <li key={s.n} className="bg-cream p-6 md:p-7">
+                  <span className="font-mono text-[0.8rem] font-semibold text-leaf">{s.n}</span>
+                  <h3 className="mt-3 text-[1.15rem] font-bold tracking-[-0.01em]">{s.title}</h3>
+                  <p className="mt-2.5 text-[0.98rem] leading-relaxed text-muted">{s.body}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </Reveal>
+
+        {/* After the vote — Live results */}
         <Reveal>
         <section
           id="results"
@@ -254,12 +294,12 @@ export default function Home() {
         </section>
         </Reveal>
 
-        {/* ── Closing CTA ────────────────────────────────────── */}
+        {/* Closing CTA  */}
         <Reveal>
         <section id="dashboard" className={`${SECTION_X} py-[clamp(5rem,12vw,10rem)] text-center`}>
           <div className="mx-auto max-w-[700px]">
             <span className="mb-7 inline-flex items-center gap-2 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-leaf">
-              <span className="inline-block h-px w-6 bg-lime" aria-hidden />
+              <span className="inline-block h-px w-6 bg-ink/25" aria-hidden />
               Be the record
             </span>
             <h2 className="mx-auto max-w-[14ch] text-[clamp(2.5rem,6vw,4.8rem)] font-extrabold leading-[1.02] tracking-[-0.035em] [text-wrap:balance]">

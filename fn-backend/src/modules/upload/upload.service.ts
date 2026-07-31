@@ -1,16 +1,25 @@
 import { and, count, desc, eq, sql } from 'drizzle-orm';
 
 import { appDb } from '../../db';
-import { elections, lgas, sheets, sheetFlags, type Sheet } from '../../db/app/schema';
+import {
+  electionResults,
+  elections,
+  lgas,
+  sheets,
+  sheetFlags,
+  type Sheet,
+} from '../../db/app/schema';
 import { isUniqueViolation } from '../../shared/db-errors';
 import { AppError } from '../../shared/errors';
-import { publicUrlFor } from '../../shared/storage';
+import { publicUrlFor, thumbnailUrlFor } from '../../shared/storage';
 import type { Pagination } from '../../shared/response';
 import { writeAudit, type AuditActor } from '../audit/audit.service';
+import { listParties } from '../elections/elections.parties.service';
 import type {
   FlagResult,
   ListSheetsQuery,
   PublicSheet,
+  PublicSheetResult,
   SheetUploadFields,
 } from './upload.schemas';
 
@@ -33,6 +42,7 @@ export function toPublicSheet(row: Sheet): PublicSheet {
     puCode: row.puCode,
     fileHash: row.fileHash,
     fileUrl: publicUrlFor(row.r2Key),
+    thumbUrl: thumbnailUrlFor(row.r2Key, row.mimeType),
     mimeType: row.mimeType,
     fileSize: row.fileSize,
     status: row.status,
@@ -119,6 +129,7 @@ export async function listSheets(
 ): Promise<{ sheets: PublicSheet[]; pagination: Pagination }> {
   const filters = [
     query.electionId ? eq(sheets.electionId, query.electionId) : undefined,
+    query.stateId ? eq(sheets.stateId, query.stateId) : undefined,
     query.lgaId ? eq(sheets.lgaId, query.lgaId) : undefined,
     query.status ? eq(sheets.status, query.status) : undefined,
   ].filter(Boolean);
@@ -148,6 +159,41 @@ export async function listSheets(
   };
 }
 
+
+export async function listMySheets(
+  uploaderId: string,
+  query: ListSheetsQuery,
+): Promise<{ sheets: PublicSheet[]; pagination: Pagination }> {
+  const filters = [
+    eq(sheets.uploadedBy, uploaderId),
+    query.electionId ? eq(sheets.electionId, query.electionId) : undefined,
+    query.stateId ? eq(sheets.stateId, query.stateId) : undefined,
+    query.lgaId ? eq(sheets.lgaId, query.lgaId) : undefined,
+    query.status ? eq(sheets.status, query.status) : undefined,
+  ].filter(Boolean);
+  const where = and(...filters);
+
+  const [{ total }] = await appDb.select({ total: count() }).from(sheets).where(where);
+
+  const rows = await appDb
+    .select()
+    .from(sheets)
+    .where(where)
+    .orderBy(desc(sheets.createdAt))
+    .limit(query.limit)
+    .offset((query.page - 1) * query.limit);
+
+  return {
+    sheets: rows.map(toPublicSheet),
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      hasNext: query.page * query.limit < total,
+    },
+  };
+}
+
 export async function getSheet(id: string): Promise<PublicSheet> {
   const [row] = await appDb.select().from(sheets).where(eq(sheets.id, id)).limit(1);
   if (!row) {
@@ -156,6 +202,58 @@ export async function getSheet(id: string): Promise<PublicSheet> {
   return toPublicSheet(row);
 }
 
+
+// GET /sheets/:id/result — the agreed figures published from a verified sheet.
+
+export async function getSheetResult(sheetId: string): Promise<PublicSheetResult> {
+  const [sheet] = await appDb
+    .select({ id: sheets.id, status: sheets.status })
+    .from(sheets)
+    .where(eq(sheets.id, sheetId))
+    .limit(1);
+  if (!sheet) {
+    throw new AppError('NOT_FOUND', 'Sheet not found.');
+  }
+
+  const [row] = await appDb
+    .select()
+    .from(electionResults)
+    .where(eq(electionResults.sheetId, sheetId))
+    .limit(1);
+  if (!row) {
+    throw new AppError(
+      'NOT_FOUND',
+      sheet.status === 'disputed'
+        ? 'This sheet is disputed, so no figures have been published from it.'
+        : 'This sheet has not been verified yet, so no figures have been published from it.',
+    );
+  }
+
+  // Resolve party ids to names so the reader never sees a bare UUID.
+  const parties = await listParties(row.electionId);
+  const votes = (row.partyVotes ?? {}) as Record<string, number>;
+  const partyVotes = parties.map((p) => ({
+    partyId: p.id,
+    abbreviation: p.abbreviation,
+    name: p.name,
+    candidateName: p.candidateName,
+    votes: votes[p.id] ?? 0,
+  }));
+
+  const agreed = Array.isArray(row.agreedEntryIds) ? row.agreedEntryIds.length : 0;
+
+  return {
+    sheetId,
+    puCode: row.puCode,
+    accreditedVoters: row.accreditedVoters,
+    totalValidVotes: row.totalValidVotes,
+    rejectedBallots: row.rejectedBallots,
+    totalVotesCast: row.totalVotesCast,
+    partyVotes,
+    agreedReadings: agreed,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
 
 export async function flagSheet(
   sheetId: string,

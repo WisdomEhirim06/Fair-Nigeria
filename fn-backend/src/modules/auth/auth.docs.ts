@@ -3,18 +3,14 @@ import { z } from 'zod';
 import { authErrors, commonErrors, jsonError, jsonOk } from '../../shared/openapi/helpers';
 import { registry } from '../../shared/openapi/registry';
 import { publicUserSchema, registerBodySchema } from './auth.schemas';
-import {
-  refreshBodySchema,
-  requestOtpBodySchema,
-  verifyOtpBodySchema,
-} from './otp.schemas';
+import { requestOtpBodySchema, verifyOtpBodySchema } from './otp.schemas';
 
-//  Registered schemas (appear in the Components / Schemas panel)
 
 const RegisterRequest = registry.register('RegisterRequest', registerBodySchema.openapi({
   example: {
     fullName: 'Adaeze Okeke',
     phoneNumber: '+2348012345678',
+    email: 'adaeze@example.com',
     ninHash: 'a'.repeat(64),
     state: 'Lagos',
     geopoliticalZone: 'SW',
@@ -45,15 +41,10 @@ const VerifyOtpRequest = registry.register('VerifyOtpRequest', verifyOtpBodySche
   example: { phoneNumber: '+2348012345678', code: '123456' },
 }));
 
-const RefreshRequest = registry.register('RefreshRequest', refreshBodySchema.openapi({
-  example: { refreshToken: '<opaque-refresh-token>' },
-}));
-
-const TokenPairSchema = registry.register(
-  'TokenPair',
+const AccessSession = registry.register(
+  'AccessSession',
   z.object({
     accessToken: z.string().openapi({ description: 'RS256 JWT, 2h TTL.' }),
-    refreshToken: z.string().openapi({ description: 'Opaque token, 7d TTL.' }),
     expiresIn: z.number().openapi({ example: 7200, description: 'Access token TTL in seconds.' }),
   }),
 );
@@ -68,16 +59,18 @@ registry.registerPath({
   summary: 'Register a citizen',
   description:
     'Creates a citizen account from a client-side SHA-256 NIN hash and immediately ' +
-    'dispatches a login OTP — go straight to verify-otp next. The raw NIN never ' +
-    'reaches the server. `state`, if given, must be a real Nigerian state (the zone ' +
-    'is derived from it). Duplicate nin_hash or phone_number → 409.',
+    'dispatches a login OTP by email — go straight to verify-otp next. The raw NIN ' +
+    'never reaches the server. Phone stays the login identity; `email` is only where ' +
+    'the OTP is delivered. `state`, if given, must be a real Nigerian state (the zone ' +
+    'is derived from it). Duplicate nin_hash, phone_number, or email → 409.',
   request: { body: { required: true, content: { 'application/json': { schema: RegisterRequest } } } },
   responses: {
+    ...commonErrors(),
     201: jsonOk(RegisterResponse, 'Account created; OTP dispatched.'),
     400: jsonError('Validation failed (e.g. unknown state).'),
-    409: jsonError('NIN or phone number already registered.'),
+    409: jsonError('NIN, phone number, or email already registered.'),
     422: jsonError('Invite code is invalid, expired, or fully used.'),
-    ...commonErrors(),
+    
   },
 });
 
@@ -89,8 +82,8 @@ registry.registerPath({
   summary: 'Request an OTP (also serves as login)',
   description:
     'Generates a 6-digit OTP, stores its SHA-256 hash in Redis (5-min TTL), and ' +
-    'dispatches it via SMS. Returns 200 regardless of whether the phone is ' +
-    'registered to prevent phone-number enumeration.',
+    'emails it to the address on file for that phone number. Returns 200 regardless ' +
+    'of whether the phone is registered to prevent phone-number enumeration.',
   request: { body: { required: true, content: { 'application/json': { schema: RequestOtpRequest } } } },
   responses: {
     200: jsonOk(z.object({ message: z.string() }), 'OTP dispatched (or silently ignored for unregistered phones).'),
@@ -103,14 +96,14 @@ registry.registerPath({
   method: 'post',
   path: '/api/v1/auth/verify-otp',
   tags: ['Auth'],
-  summary: 'Verify OTP and receive tokens',
+  summary: 'Verify OTP and receive a session',
   description:
     'Verifies the 6-digit OTP against the Redis hash (constant-time comparison). ' +
-    'On success: marks the DB record used, deletes the Redis key, issues a 2h access ' +
-    'token and a 7d refresh token.',
+    'On success: returns a 2h access token in the body and sets the 7d refresh token ' +
+    'as an httpOnly, Secure, SameSite cookie. The refresh token is never in the body.',
   request: { body: { required: true, content: { 'application/json': { schema: VerifyOtpRequest } } } },
   responses: {
-    200: jsonOk(TokenPairSchema, 'OTP verified — access and refresh tokens issued.'),
+    200: jsonOk(AccessSession, 'OTP verified. Access token returned; refresh cookie set.'),
     401: jsonError('OTP incorrect, expired, or already used.'),
     ...commonErrors(),
   },
@@ -123,12 +116,12 @@ registry.registerPath({
   tags: ['Auth'],
   summary: 'Rotate refresh token',
   description:
-    'Validates the refresh token, revokes it, and issues a new access + refresh pair. ' +
-    'A replayed token is rejected.',
-  request: { body: { required: true, content: { 'application/json': { schema: RefreshRequest } } } },
+    'Reads the refresh token from its httpOnly cookie, revokes it, and issues a new ' +
+    'access token plus a rotated refresh cookie. A replayed token is rejected. No ' +
+    'request body — the cookie is sent automatically.',
   responses: {
-    200: jsonOk(TokenPairSchema, 'New token pair issued.'),
-    401: jsonError('Token invalid, expired, or already revoked.'),
+    200: jsonOk(AccessSession, 'New access token issued; refresh cookie rotated.'),
+    401: jsonError('Refresh cookie missing, invalid, expired, or already revoked.'),
     ...commonErrors(),
   },
 });
@@ -139,8 +132,9 @@ registry.registerPath({
   path: '/api/v1/auth/logout',
   tags: ['Auth'],
   summary: 'Logout (revoke refresh token)',
-  description: 'Marks the refresh token as revoked. Idempotent — already-revoked tokens are silently accepted.',
-  request: { body: { required: true, content: { 'application/json': { schema: RefreshRequest } } } },
+  description:
+    'Revokes the refresh token read from its httpOnly cookie and clears the cookie. ' +
+    'Idempotent — a missing or already-revoked token is silently accepted. No request body.',
   responses: {
     200: jsonOk(z.object({ message: z.string() }), 'Logged out.'),
     ...commonErrors(),

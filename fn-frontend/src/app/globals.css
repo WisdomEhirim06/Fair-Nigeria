@@ -10,6 +10,7 @@
   --color-gold: #c7a24a;
   --color-muted: #46594e;
   --color-leaf: #5e8a28;
+  --color-error: #b3402f;
 
   --font-display: var(--font-bricolage), system-ui, sans-serif;
   --font-mono: var(--font-jb-mono), ui-monospace, monospace;

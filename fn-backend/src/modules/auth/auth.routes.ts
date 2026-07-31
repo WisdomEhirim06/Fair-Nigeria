@@ -12,7 +12,7 @@ import {
   verifyOtpHandler,
 } from './auth.controller';
 import { registerBodySchema } from './auth.schemas';
-import { refreshBodySchema, requestOtpBodySchema, verifyOtpBodySchema } from './otp.schemas';
+import { requestOtpBodySchema, verifyOtpBodySchema } from './otp.schemas';
 
 
 export const authRouter = Router();
@@ -20,13 +20,13 @@ export const authRouter = Router();
 //Registration
 authRouter.post('/register', validate(registerBodySchema), register);
 
-// OTP generation — rate limited per phone number (anti SMS-bombing)
+// OTP generation — rate limited per phone number
 authRouter.post('/request-otp', otpRateLimiter, validate(requestOtpBodySchema), requestOtpHandler);
 
-// OTP verify tokens, refresh rotation, logout
+// OTP verify issues tokens; refresh + logout use the httpOnly refresh cookie (no body).
 authRouter.post('/verify-otp', validate(verifyOtpBodySchema), verifyOtpHandler);
-authRouter.post('/refresh', validate(refreshBodySchema), refreshHandler);
-authRouter.post('/logout', validate(refreshBodySchema), logoutHandler);
+authRouter.post('/refresh', refreshHandler);
+authRouter.post('/logout', logoutHandler);
 
 // Authenticated profile — requires a valid Bearer token
 authRouter.get('/me', requireAuth, getMeHandler);

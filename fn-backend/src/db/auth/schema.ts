@@ -24,6 +24,7 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   fullName: varchar('full_name', { length: 120 }).notNull(),
   phoneNumber: varchar('phone_number', { length: 20 }).notNull().unique(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
   ninHash: char('nin_hash', { length: 64 }).notNull().unique(),
   role: userRole('role').notNull().default('citizen'),
   state: varchar('state', { length: 60 }),

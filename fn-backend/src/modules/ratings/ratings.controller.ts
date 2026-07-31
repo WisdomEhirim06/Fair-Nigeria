@@ -4,7 +4,7 @@ import { successEnvelope } from '../../shared/response';
 import { myRatingQuerySchema, type SubmitRatingInput } from './ratings.schemas';
 import { getMyRating, submitRating } from './ratings.service';
 
-/** POST /ratings — submit a rating for an election (citizen only). */
+/** POST /ratings — submit a rating for an election. Any signed-in role. */
 export const submitRatingHandler: RequestHandler = async (req, res, next) => {
   try {
     const rating = await submitRating(req.user!.id, req.body as SubmitRatingInput);

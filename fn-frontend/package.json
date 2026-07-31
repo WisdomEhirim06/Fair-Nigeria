@@ -4,7 +4,7 @@
   "private": true,
   "description": "Fair Nigeria frontend (Next.js PWA) — citizen-led electoral transparency for the 2027 election.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit"
