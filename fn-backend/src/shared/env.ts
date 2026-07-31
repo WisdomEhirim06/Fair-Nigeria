@@ -39,7 +39,8 @@ const envSchema = z.object({
 
   FCM_SERVICE_ACCOUNT_B64: z.string().optional(),
 
-  OTP_SMS_API_KEY: z.string().optional(),
+  RESEND_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().default('Fair Nigeria <onboarding@resend.dev>'),
 
   FLAG_THRESHOLD: z.coerce.number().int().positive().default(5),
 

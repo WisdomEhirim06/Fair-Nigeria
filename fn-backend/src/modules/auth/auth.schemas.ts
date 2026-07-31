@@ -14,6 +14,7 @@ export const registerBodySchema = z
   .object({
     fullName: z.string().trim().min(2).max(120),
     phoneNumber: phoneNumberSchema,
+    email: z.string().trim().toLowerCase().email().max(255),
     ninHash: ninHashSchema,
     state: z.string().trim().min(2).max(60).optional(),
     geopoliticalZone: geopoliticalZoneSchema.optional(),
@@ -31,6 +32,7 @@ export const publicUserSchema = z.object({
   id: z.string().uuid(),
   fullName: z.string(),
   phoneNumber: z.string(),
+  email: z.string(),
   role: roleSchema,
   state: z.string().nullable(),
   geopoliticalZone: z.string().nullable(),

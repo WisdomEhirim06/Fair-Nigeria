@@ -5,6 +5,7 @@ export interface ApiUser {
   id: string;
   fullName: string;
   phoneNumber: string;
+  email: string;
   role: Role;
   state: string | null;
   geopoliticalZone: string | null;

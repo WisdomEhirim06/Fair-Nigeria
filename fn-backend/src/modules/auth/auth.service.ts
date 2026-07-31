@@ -45,6 +45,7 @@ export function toPublicUser(user: User): PublicUser {
     id: user.id,
     fullName: user.fullName,
     phoneNumber: user.phoneNumber,
+    email: user.email,
     role: user.role,
     state: user.state,
     geopoliticalZone: user.geopoliticalZone,
@@ -69,6 +70,9 @@ function translateUserDuplicate(err: unknown): never {
       'phoneNumber',
     );
   }
+  if (isUniqueViolation(err, 'users_email_unique')) {
+    throw new AppError('DUPLICATE_EMAIL', 'This email is already registered.', 'email');
+  }
   throw err;
 }
 
@@ -87,6 +91,7 @@ export async function registerUser(input: RegisterInput): Promise<User> {
       .values({
         fullName: input.fullName,
         phoneNumber: input.phoneNumber,
+        email: input.email,
         ninHash: input.ninHash,
         role: 'citizen',
         state: resolved?.name ?? null,
@@ -137,6 +142,7 @@ async function registerWithInviteCode(input: RegisterInput, rawCode: string): Pr
         .values({
           fullName: input.fullName,
           phoneNumber: input.phoneNumber,
+          email: input.email,
           ninHash: input.ninHash,
           role: code.role,
           // Geographic assignment comes from the code, not the client.

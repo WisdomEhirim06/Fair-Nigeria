@@ -8,20 +8,24 @@ import { PhoneField } from './PhoneField';
 import { StateSelect } from './StateSelect';
 import { NIGERIAN_STATES } from './states';
 
-type FieldKey = 'fullName' | 'nin' | 'phone' | 'state';
+type FieldKey = 'fullName' | 'email' | 'nin' | 'phone' | 'state';
 type Errors = Partial<Record<FieldKey, string>>;
 
 /** Maps a backend error `field` to the matching form field. */
 const FIELD_MAP: Record<string, FieldKey> = {
   fullName: 'fullName',
+  email: 'email',
   ninHash: 'nin',
   phoneNumber: 'phone',
   state: 'state',
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 /** onSubmit fires with the full phone (+234XXXXXXXXXX) once registration succeeds. */
 export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
   const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [nin, setNin] = useState('');
   const [phone, setPhone] = useState('');
   const [state, setState] = useState('');
@@ -45,6 +49,7 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
   function validate(): Errors {
     const next: Errors = {};
     if (fullName.trim().length < 2) next.fullName = 'Enter your full name.';
+    if (!EMAIL_RE.test(email)) next.email = 'Enter a valid email — your code is sent here.';
     if (!/^\d{11}$/.test(nin)) next.nin = 'Your NIN is 11 digits.';
     if (!/^\d{10}$/.test(phone)) next.phone = 'Enter the 10 digits after +234.';
     if (!state) next.state = 'Choose your state.';
@@ -72,6 +77,7 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
       await registerCitizen({
         fullName: fullName.trim(),
         phoneNumber: `+234${phone}`,
+        email: email.trim(),
         nin,
         state,
       });
@@ -89,7 +95,8 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
         Create your account
       </h1>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
-        It takes a minute. Your NIN is hashed on your device, never sent or stored.
+        It takes a minute. Your NIN is hashed on your device, never sent or stored. We’ll email you
+        a code to confirm it’s really you.
       </p>
 
       <div className="mt-7 space-y-3.5">
@@ -102,6 +109,17 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
           }}
           error={errors.fullName}
           autoComplete="name"
+        />
+        <AuthField
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(v) => {
+            setEmail(v);
+            clear('email');
+          }}
+          error={errors.email}
+          autoComplete="email"
         />
         <AuthField
           label="NIN (11 digits)"

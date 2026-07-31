@@ -7,7 +7,7 @@ import * as schema from './schema';
 // Drizzle client for the auth database (fn_auth).
 
 const client = postgres(env.AUTH_DATABASE_URL, {
-  ssl: env.NODE_ENV === 'production' ? 'require' : false,
+  ssl: 'prefer',
   max: 5,
   idle_timeout: 30,
   connect_timeout: 10,

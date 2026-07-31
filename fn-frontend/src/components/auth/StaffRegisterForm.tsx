@@ -6,19 +6,23 @@ import { ApiError, registerStaff } from '@/lib/api';
 import { AuthField } from './AuthField';
 import { PhoneField } from './PhoneField';
 
-type FieldKey = 'fullName' | 'nin' | 'phone' | 'inviteCode';
+type FieldKey = 'fullName' | 'email' | 'nin' | 'phone' | 'inviteCode';
 type Errors = Partial<Record<FieldKey, string>>;
 
 const FIELD_MAP: Record<string, FieldKey> = {
   fullName: 'fullName',
+  email: 'email',
   ninHash: 'nin',
   phoneNumber: 'phone',
   inviteCode: 'inviteCode',
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // The invite code is what differentiate the citizen registration from the official.
 export function StaffRegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
   const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [nin, setNin] = useState('');
   const [phone, setPhone] = useState('');
   const [inviteCode, setInviteCode] = useState('');
@@ -34,6 +38,7 @@ export function StaffRegisterForm({ onSubmit }: { onSubmit: (phone: string) => v
   function validate(): Errors {
     const next: Errors = {};
     if (fullName.trim().length < 2) next.fullName = 'Enter your full name.';
+    if (!EMAIL_RE.test(email)) next.email = 'Enter a valid email — your code is sent here.';
     if (!/^\d{11}$/.test(nin)) next.nin = 'Your NIN is 11 digits.';
     if (!/^\d{10}$/.test(phone)) next.phone = 'Enter the 10 digits after +234.';
     if (!inviteCode.trim()) next.inviteCode = 'Enter the invite code from your coordinator.';
@@ -60,6 +65,7 @@ export function StaffRegisterForm({ onSubmit }: { onSubmit: (phone: string) => v
       await registerStaff({
         fullName: fullName.trim(),
         phoneNumber: `+234${phone}`,
+        email: email.trim(),
         nin,
         inviteCode: inviteCode.trim(),
       });
@@ -78,7 +84,7 @@ export function StaffRegisterForm({ onSubmit }: { onSubmit: (phone: string) => v
       </h1>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
         Use the invite code from your coordinator. Your NIN is hashed on your device, never sent or
-        stored.
+        stored. We’ll email you a code to confirm it’s really you.
       </p>
 
       <div className="mt-7 space-y-3.5">
@@ -91,6 +97,17 @@ export function StaffRegisterForm({ onSubmit }: { onSubmit: (phone: string) => v
           }}
           error={errors.fullName}
           autoComplete="name"
+        />
+        <AuthField
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(v) => {
+            setEmail(v);
+            clear('email');
+          }}
+          error={errors.email}
+          autoComplete="email"
         />
         <AuthField
           label="NIN (11 digits)"

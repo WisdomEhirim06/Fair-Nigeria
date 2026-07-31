@@ -9,6 +9,7 @@ import type { AccessSession, ApiUser, RegisterResult } from './types';
 export async function registerCitizen(input: {
   fullName: string;
   phoneNumber: string;
+  email: string;
   nin: string;
   state: string;
 }): Promise<RegisterResult> {
@@ -18,6 +19,7 @@ export async function registerCitizen(input: {
     body: JSON.stringify({
       fullName: input.fullName,
       phoneNumber: input.phoneNumber,
+      email: input.email,
       ninHash,
       state: input.state,
     }),
@@ -28,6 +30,7 @@ export async function registerCitizen(input: {
 export async function registerStaff(input: {
   fullName: string;
   phoneNumber: string;
+  email: string;
   nin: string;
   inviteCode: string;
 }): Promise<RegisterResult> {
@@ -37,6 +40,7 @@ export async function registerStaff(input: {
     body: JSON.stringify({
       fullName: input.fullName,
       phoneNumber: input.phoneNumber,
+      email: input.email,
       ninHash,
       inviteCode: input.inviteCode,
     }),

@@ -74,10 +74,10 @@ export function OtpForm({ phone, active, onBack, onVerified }: Props) {
       </button>
 
       <h1 className="mt-4 text-[clamp(1.9rem,4vw,2.6rem)] font-extrabold leading-[1.05] tracking-[-0.03em]">
-        Verify your number
+        Check your email
       </h1>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
-        Enter the 6-digit code we sent to your number.
+        Enter the 6-digit code we emailed you.
       </p>
 
       <div className="mt-7">

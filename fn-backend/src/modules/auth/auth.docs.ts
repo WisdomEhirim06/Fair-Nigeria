@@ -10,6 +10,7 @@ const RegisterRequest = registry.register('RegisterRequest', registerBodySchema.
   example: {
     fullName: 'Adaeze Okeke',
     phoneNumber: '+2348012345678',
+    email: 'adaeze@example.com',
     ninHash: 'a'.repeat(64),
     state: 'Lagos',
     geopoliticalZone: 'SW',
@@ -58,15 +59,16 @@ registry.registerPath({
   summary: 'Register a citizen',
   description:
     'Creates a citizen account from a client-side SHA-256 NIN hash and immediately ' +
-    'dispatches a login OTP — go straight to verify-otp next. The raw NIN never ' +
-    'reaches the server. `state`, if given, must be a real Nigerian state (the zone ' +
-    'is derived from it). Duplicate nin_hash or phone_number → 409.',
+    'dispatches a login OTP by email — go straight to verify-otp next. The raw NIN ' +
+    'never reaches the server. Phone stays the login identity; `email` is only where ' +
+    'the OTP is delivered. `state`, if given, must be a real Nigerian state (the zone ' +
+    'is derived from it). Duplicate nin_hash, phone_number, or email → 409.',
   request: { body: { required: true, content: { 'application/json': { schema: RegisterRequest } } } },
   responses: {
     ...commonErrors(),
     201: jsonOk(RegisterResponse, 'Account created; OTP dispatched.'),
     400: jsonError('Validation failed (e.g. unknown state).'),
-    409: jsonError('NIN or phone number already registered.'),
+    409: jsonError('NIN, phone number, or email already registered.'),
     422: jsonError('Invite code is invalid, expired, or fully used.'),
     
   },
@@ -80,8 +82,8 @@ registry.registerPath({
   summary: 'Request an OTP (also serves as login)',
   description:
     'Generates a 6-digit OTP, stores its SHA-256 hash in Redis (5-min TTL), and ' +
-    'dispatches it via SMS. Returns 200 regardless of whether the phone is ' +
-    'registered to prevent phone-number enumeration.',
+    'emails it to the address on file for that phone number. Returns 200 regardless ' +
+    'of whether the phone is registered to prevent phone-number enumeration.',
   request: { body: { required: true, content: { 'application/json': { schema: RequestOtpRequest } } } },
   responses: {
     200: jsonOk(z.object({ message: z.string() }), 'OTP dispatched (or silently ignored for unregistered phones).'),
