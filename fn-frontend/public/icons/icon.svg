@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Fair Nigeria">
+  <rect width="512" height="512" rx="112" fill="#214034"/>
+  <!-- Content kept inside the central 60% so it survives maskable cropping. -->
+  <circle cx="256" cy="256" r="132" fill="#6faa2e"/>
+  <path d="M196 260 L238 302 L318 214"
+        fill="none" stroke="#fbfaf6" stroke-width="34"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

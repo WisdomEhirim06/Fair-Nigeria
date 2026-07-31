@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import { listAudit, type AuditEntry } from '@/lib/api';
 
@@ -74,43 +74,49 @@ export function AuditViewer() {
   const [entityType, setEntityType] = useState('');
 
   const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
 
+  // Bumped on every filter change, so a page that lands after the filters moved
+  // is discarded instead of being appended to a list it doesn't belong to.
+  const requestTicket = useRef(0);
+
   // Reload from the first page whenever a filter changes.
   useEffect(() => {
-    let active = true;
+    const ticket = ++requestTicket.current;
+    setLoading(true);
     void (async () => {
-      setLoading(true);
       const rows = await listAudit({
         page: 1,
         limit: LIMIT,
         action: action || undefined,
         entityType: entityType || undefined,
       }).catch(() => []);
-      if (!active) return;
+      if (requestTicket.current !== ticket) return;
       setEntries(rows);
+      setPage(1);
       setHasMore(rows.length === LIMIT);
       setLoading(false);
     })();
-    return () => {
-      active = false;
-    };
   }, [action, entityType]);
 
   async function loadMore() {
+    const ticket = requestTicket.current;
+    const next = page + 1;
     setLoadingMore(true);
-    const nextPage = Math.floor(entries.length / LIMIT) + 1;
     const rows = await listAudit({
-      page: nextPage,
+      page: next,
       limit: LIMIT,
       action: action || undefined,
       entityType: entityType || undefined,
     }).catch(() => []);
-    setEntries((prev) => [...prev, ...rows]);
-    setHasMore(rows.length === LIMIT);
     setLoadingMore(false);
+    if (requestTicket.current !== ticket) return;
+    setEntries((prev) => [...prev, ...rows]);
+    setPage(next);
+    setHasMore(rows.length === LIMIT);
   }
 
   const groups = useMemo(() => {

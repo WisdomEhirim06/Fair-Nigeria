@@ -13,18 +13,27 @@ import {
   type StateOption,
 } from '@/lib/api';
 import { SelectField } from '@/components/ui/SelectField';
+import { enqueueUpload } from '@/lib/offline/uploadQueue';
 
 type Props = {
   election: Election;
   /** The officer's own state name, used to preselect the state dropdown. */
   defaultStateName?: string | null;
   onUploaded: (sheet: Sheet) => void;
+  /** The sheet couldn't be sent and is safely queued on the device. */
+  onQueued: () => void;
   onCancel: () => void;
 };
 
 const ACCEPT = 'image/jpeg,image/png,application/pdf';
 
-export function UploadForm({ election, defaultStateName, onUploaded, onCancel }: Props) {
+export function UploadForm({
+  election,
+  defaultStateName,
+  onUploaded,
+  onQueued,
+  onCancel,
+}: Props) {
   const [states, setStates] = useState<StateOption[]>([]);
   const [lgas, setLgas] = useState<Lga[]>([]);
   const [stateId, setStateId] = useState('');
@@ -88,11 +97,40 @@ export function UploadForm({ election, defaultStateName, onUploaded, onCancel }:
 
   const ready = Boolean(file && stateId && lgaId && puCode.trim());
 
+  /** Save the sheet on the device so it can be sent when there's signal. */
+  async function queueIt(): Promise<boolean> {
+    if (!file) return false;
+    try {
+      await enqueueUpload({
+        electionId: election.id,
+        stateId,
+        lgaId,
+        puCode: puCode.trim(),
+        blob: file,
+        fileName: file.name || 'sheet',
+        mimeType: file.type,
+      });
+      onQueued();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async function submit() {
     if (!ready || !file) return;
     setSubmitting(true);
     setError(null);
     setFieldError(null);
+
+    // Plainly offline: don't waste the officer's time on a doomed request.
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      if (await queueIt()) return;
+      setError('Could not save this sheet on your device. Try again.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const sheet = await uploadSheet({
         electionId: election.id,
@@ -103,12 +141,22 @@ export function UploadForm({ election, defaultStateName, onUploaded, onCancel }:
       });
       onUploaded(sheet);
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-        setFieldError(err.field ?? null);
-      } else {
-        setError('Upload failed. Check your connection and try again.');
+      // A 4xx other than 401 means the server looked at this and refused it —
+      // retrying unchanged would fail forever, so show it and let the officer
+      // fix it. Anything else (network dropped, expired session, server
+      // trouble) is worth keeping and sending later.
+      const permanent =
+        err instanceof ApiError && err.status >= 400 && err.status < 500 && err.status !== 401;
+
+      if (permanent) {
+        setError((err as ApiError).message);
+        setFieldError((err as ApiError).field ?? null);
+        setSubmitting(false);
+        return;
       }
+
+      if (await queueIt()) return;
+      setError('Upload failed and the sheet could not be saved. Please try again.');
       setSubmitting(false);
     }
   }

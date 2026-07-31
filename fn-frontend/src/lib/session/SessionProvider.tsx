@@ -16,7 +16,6 @@ export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 interface SessionValue {
   user: ApiUser | null;
   status: SessionStatus;
-  /** Loads the freshly-signed-in user and returns it, so callers can route by role. */
   signIn: () => Promise<ApiUser | null>;
   signOut: () => Promise<void>;
 }
@@ -64,6 +63,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     await apiLogout();
     setUser(null);
     setStatus('unauthenticated');
+    // Drop anything the service worker cached during this session, so a shared
+    // phone doesn't hand the next person the last one's browsing.
+    if (typeof navigator !== 'undefined' && navigator.serviceWorker?.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHES' });
+    }
   }, []);
 
   return (
