@@ -1,3 +1,5 @@
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
@@ -60,6 +62,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </a>
         <SessionProvider>{children}</SessionProvider>
         <PwaLayer />
+        {/* Both no-op outside Vercel, so local dev is unaffected. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
