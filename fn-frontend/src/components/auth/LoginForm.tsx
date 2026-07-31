@@ -36,7 +36,7 @@ export function LoginForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
         Welcome back
       </h1>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
-        Enter your phone number and we’ll text you a code to sign in.
+        Enter your phone number and we’ll email you a code to sign in.
       </p>
 
       <div className="mt-7">

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const CACHE_VERSION = 'v1';
 const STATIC_CACHE = `fn-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `fn-pages-${CACHE_VERSION}`;
@@ -95,15 +96,22 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith(
       (async () => {
+        const cacheablePage = url.origin === self.location.origin && /^(\/|\/results|\/audit|\/articles|\/sheets)(\/|$)/.test(url.pathname);
         try {
           const fresh = await fetch(request);
-          const cache = await caches.open(PAGES_CACHE);
-          cache.put(request, fresh.clone());
-          void trimCache(PAGES_CACHE, MAX_PAGES);
+          if (cacheablePage && fresh.ok) {
+            const cache = await caches.open(PAGES_CACHE);
+            cache.put(request, fresh.clone());
+            void trimCache(PAGES_CACHE, MAX_PAGES);
+          }
           return fresh;
         } catch {
-          const cached = await caches.match(request);
-          if (cached) return cached;
+          if (cacheablePage) {
+            const cache = await caches.open(PAGES_CACHE);
+            const cached = await cache.match(request);
+            if (cached) return cached;
+
+          }
           const offline = await caches.match(OFFLINE_URL);
           return offline ?? Response.error();
         }
