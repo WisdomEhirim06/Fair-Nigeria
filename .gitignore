@@ -26,5 +26,6 @@ Thumbs.db
 *.swp
 meta/
 
+.next/
 *.xlsx
 .next/
