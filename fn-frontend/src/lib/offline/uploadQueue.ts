@@ -112,19 +112,39 @@ export interface FlushSummary {
   remaining: number;
 }
 
+/** The flush currently running, if any. See `flushQueue`. */
+let inFlightFlush: Promise<FlushSummary> | null = null;
+
 /**
  * Try to send everything queued.
  *
  * `send` is injected rather than imported so this module stays free of any
  * dependency on the API client, and so tests can drive it directly.
  * Set `force` to retry items that have exhausted their automatic attempts.
+ *
+ * Only one flush runs at a time. Two concurrent runs would each read the same
+ * rows out of IndexedDB before either had deleted anything, and send every
+ * sheet twice — and a duplicate sheet is not a duplicate request, it's a second
+ * independent record entering transcription and consensus. Callers arriving
+ * mid-flush get the running promise, so they still await real completion.
  */
-export async function flushQueue(
+export function flushQueue(
   send: (item: QueuedUpload) => Promise<unknown>,
   options: { force?: boolean } = {},
 ): Promise<FlushSummary> {
-  if (!supported()) return { sent: 0, failed: 0, remaining: 0 };
+  if (!supported()) return Promise.resolve({ sent: 0, failed: 0, remaining: 0 });
+  if (inFlightFlush) return inFlightFlush;
 
+  inFlightFlush = runFlush(send, options).finally(() => {
+    inFlightFlush = null;
+  });
+  return inFlightFlush;
+}
+
+async function runFlush(
+  send: (item: QueuedUpload) => Promise<unknown>,
+  options: { force?: boolean },
+): Promise<FlushSummary> {
   const items = await listQueuedUploads();
   let sent = 0;
   let failed = 0;

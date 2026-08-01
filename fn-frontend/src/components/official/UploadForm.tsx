@@ -27,6 +27,8 @@ type Props = {
 
 const ACCEPT = 'image/jpeg,image/png,application/pdf';
 
+const RETRYABLE_STATUSES = new Set([401, 408, 429]);
+
 export function UploadForm({
   election,
   defaultStateName,
@@ -141,12 +143,16 @@ export function UploadForm({
       });
       onUploaded(sheet);
     } catch (err) {
-      // A 4xx other than 401 means the server looked at this and refused it —
-      // retrying unchanged would fail forever, so show it and let the officer
-      // fix it. Anything else (network dropped, expired session, server
-      // trouble) is worth keeping and sending later.
+      // A 4xx means the server looked at this and refused it — retrying
+      // unchanged would fail forever, so show it and let the officer fix it.
+      // Anything else (network dropped, server trouble) is worth keeping and
+      // sending later, as are the 4xx codes in RETRYABLE_STATUSES, which say
+      // "not now" rather than "not ever".
       const permanent =
-        err instanceof ApiError && err.status >= 400 && err.status < 500 && err.status !== 401;
+        err instanceof ApiError &&
+        err.status >= 400 &&
+        err.status < 500 &&
+        !RETRYABLE_STATUSES.has(err.status);
 
       if (permanent) {
         setError((err as ApiError).message);
@@ -184,7 +190,6 @@ export function UploadForm({
         {file ? (
           <div className="overflow-hidden rounded-2xl border border-ink/15 bg-white">
             {previewUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={previewUrl} alt="Selected sheet" className="max-h-72 w-full object-contain" />
             ) : (
               <div className="flex items-center gap-3 px-5 py-6">
