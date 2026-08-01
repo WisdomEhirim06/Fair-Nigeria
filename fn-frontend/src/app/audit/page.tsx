@@ -1,5 +1,14 @@
+import type { Metadata } from 'next';
+
 import { PageChrome } from '@/components/app/PageChrome';
 import { AuditViewer } from '@/components/audit/AuditViewer';
+
+export const metadata: Metadata = {
+  title: 'Transparency trail',
+  description:
+    'A running, append-only record of every official action taken on Fair Nigeria — what happened, and when. No login required to read it.',
+  alternates: { canonical: '/audit' },
+};
 
 // Public, append-only transparency trail. No login required.
 export default function AuditPage() {
