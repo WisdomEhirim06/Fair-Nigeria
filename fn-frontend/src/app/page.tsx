@@ -5,6 +5,7 @@ import { Reveal } from '@/components/Reveal';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteNav } from '@/components/SiteNav';
 
+
 function Eyebrow({ children, light = false }: { children: ReactNode; light?: boolean }) {
   return (
     <span
@@ -112,30 +113,28 @@ export default function Home() {
                 Learn what should and shouldn’t happen.
               </h2>
               <p className="mt-4 max-w-[44ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-relaxed text-muted">
-                Clear, plain-English articles on your rights, how accreditation works, and what
-                counts as malpractice, so you arrive knowing what to expect.
+                Easy-to-read guides on your rights, and what
+                counts as malpractice, so you know what to expect.
               </p>
               <a
                 href="/articles"
-                className="mt-5 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1 font-semibold transition-colors hover:border-lime"
+                className="mt-5 inline-flex items-center gap-2 border-b-[1.5px] border-ink/30 py-1.5 font-semibold transition-colors hover:border-leaf focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               >
                 Open the civic library
               </a>
             </div>
 
+
             <div className="order-1 flex min-w-[280px] flex-1 basis-[360px] justify-center md:justify-start">
-              <div
-                className="group relative w-full max-w-[400px]"
-                style={{ height: 'clamp(320px, 42vw, 400px)' }}
-              >
+              <div className="flex w-full max-w-[420px] flex-col gap-3.5">
                 {CIVIC_ARTICLES.map((a, i) => (
-                  <article
+                  <a
                     key={a.title}
-                    className="absolute inset-x-0 rounded-2xl border border-ink/12 bg-white/85 p-5 shadow-[0_16px_36px_rgba(15,31,23,0.10)] backdrop-blur transition-all duration-300 hover:-translate-y-1.5 hover:border-lime/60"
-                    style={{ top: `${i * 84}px`, height: 158, zIndex: i + 1 }}
+                    href="/articles"
+                    className="group relative rounded-2xl border border-ink/12 bg-white/85 p-5 pt-6 shadow-[0_10px_28px_rgba(15,31,23,0.08)] transition-colors hover:border-leaf/50 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                   >
                     <span
-                      className="absolute -top-2 left-5 h-4 w-12 rounded-t-md bg-lime/70"
+                      className="absolute -top-2 left-5 h-4 w-12 rounded-t-md bg-leaf/60"
                       aria-hidden
                     />
                     <div className="flex items-center justify-between">
@@ -146,13 +145,11 @@ export default function Home() {
                         {String(i + 1).padStart(2, '0')}
                       </span>
                     </div>
-                    <p className="mt-3 max-w-[24ch] text-[1.08rem] font-semibold leading-snug">
-                      {a.title}
-                    </p>
-                    <span className="absolute bottom-4 left-5 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-ink/50">
+                    <p className="mt-3 text-[1.05rem] font-semibold leading-snug">{a.title}</p>
+                    <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-ink/60 transition-colors group-hover:text-leaf">
                       Read <span aria-hidden>→</span>
                     </span>
-                  </article>
+                  </a>
                 ))}
               </div>
             </div>
@@ -203,10 +200,13 @@ export default function Home() {
                   >
                     <span className="text-[0.98rem] font-semibold">{c.label}</span>
                     <span className="flex gap-1.5" aria-label={`${c.score} out of 5`}>
+                      {/* Leaf rather than lime — five bright dots in a row read
+                          as a game score, which is the impression this whole
+                          pass is correcting. */}
                       {[1, 2, 3, 4, 5].map((n) => (
                         <span
                           key={n}
-                          className="h-3 w-3 rounded-full bg-lime"
+                          className="h-3 w-3 rounded-full bg-leaf"
                           style={{ opacity: n <= c.score ? 1 : 0.16 }}
                           aria-hidden
                         />
@@ -265,6 +265,17 @@ export default function Home() {
               Result sheets are uploaded from the field, verified by independent transcribers, and
               published the moment they agree. Every figure traces back to a sheet you can see.
             </p>
+            {/*
+              The section that talks about results now leads to them. Reading
+              this far is the clearest signal someone wants to look rather than
+              take part, and the sign-up CTA doesn't serve that person.
+            */}
+            <a
+              href="/results"
+              className="mt-8 inline-flex min-h-[52px] items-center rounded-full bg-cream px-7 text-[1rem] font-semibold text-ink transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+            >
+              See the live results
+            </a>
           </div>
 
           <div className="min-w-[300px] flex-1 basis-[400px]">
@@ -305,20 +316,6 @@ export default function Home() {
             <h2 className="mx-auto max-w-[14ch] text-[clamp(2.5rem,6vw,4.8rem)] font-extrabold leading-[1.02] tracking-[-0.035em] [text-wrap:balance]">
               Nigeria is counting on you to count.
             </h2>
-          </div>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <a
-              href="#civic"
-              className="inline-flex items-center gap-2 rounded-full bg-ink px-8 py-4 font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-lime hover:text-ink"
-            >
-              Know your power <span aria-hidden>→</span>
-            </a>
-            <a
-              href="#results"
-              className="inline-flex items-center gap-2 rounded-full border border-ink/25 px-7 py-4 font-semibold transition-colors hover:border-lime hover:bg-lime/10"
-            >
-              View the dashboard
-            </a>
           </div>
         </section>
         </Reveal>

@@ -15,10 +15,8 @@ export function CollationLedger({ className }: { className?: string }) {
       <div className="mx-auto w-full max-w-[440px] overflow-hidden rounded-2xl border border-ink/10 bg-white/90 shadow-[0_22px_60px_rgba(15,31,23,0.16)] backdrop-blur">
         <div className="flex items-center justify-between bg-ink px-5 py-3.5 text-cream">
           <span className="flex items-center gap-2.5 text-[0.82rem] font-bold tracking-[0.03em]">
-            <span className="relative flex h-2.5 w-2.5" aria-hidden>
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-60 motion-reduce:hidden" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-lime" />
-            </span>
+            {/* Static, not pulsing. The animated ping read as a game HUD. */}
+            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
             Live collation
           </span>
           <span className="font-mono text-[0.6rem] tracking-[0.12em] text-lime-bright">
