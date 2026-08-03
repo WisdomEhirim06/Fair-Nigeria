@@ -27,13 +27,13 @@ export const metadata: Metadata = {
   // social previews render blank. It has to be an absolute origin.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — verify the 2027 Nigerian election`,
+    default: `${SITE_NAME} | Citizen-led electoral transparency`,
     template: `%s — ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
-    title: `${SITE_NAME} — verify the 2027 Nigerian election`,
+    title: `${SITE_NAME} | Citizen-led electoral transparency`,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     siteName: SITE_NAME,
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} — verify the 2027 Nigerian election`,
+    title: `${SITE_NAME} | Citizen-led electoral transparency`,
     description: SITE_DESCRIPTION,
   },
   robots: {
