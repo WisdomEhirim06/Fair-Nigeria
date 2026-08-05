@@ -10,19 +10,10 @@ export async function registerCitizen(input: {
   fullName: string;
   phoneNumber: string;
   email: string;
-  nin: string;
-  state: string;
 }): Promise<RegisterResult> {
-  const ninHash = await sha256Hex(input.nin);
   return request<RegisterResult>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({
-      fullName: input.fullName,
-      phoneNumber: input.phoneNumber,
-      email: input.email,
-      ninHash,
-      state: input.state,
-    }),
+    body: JSON.stringify(input),
   });
 }
 
@@ -87,9 +78,14 @@ export async function getMe(): Promise<ApiUser> {
  * Fill in a detail left blank at registration. Add-only — the server rejects a
  * field that already has a value, so this can't edit an existing profile.
  */
-export async function addMyDetails(input: { state: string }): Promise<ApiUser> {
+export async function addMyDetails(input: { state?: string; nin?: string }): Promise<ApiUser> {
+  // The NIN is hashed here, on the device, and the raw digits never leave it.
+  const body: { state?: string; ninHash?: string } = {};
+  if (input.state !== undefined) body.state = input.state;
+  if (input.nin !== undefined) body.ninHash = await sha256Hex(input.nin);
+
   return request<ApiUser>('/auth/me/details', {
     method: 'PATCH',
-    body: JSON.stringify(input),
+    body: JSON.stringify(body),
   });
 }

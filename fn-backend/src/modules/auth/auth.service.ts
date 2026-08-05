@@ -58,26 +58,61 @@ export async function addMyDetails(
   if (!current) {
     throw new AppError('UNAUTHORIZED', 'Account not found or inactive.');
   }
-  if (current.state) {
-    throw new AppError(
-      'VALIDATION_ERROR',
-      'Your state is already set. Contact support if it needs to change.',
-      'state',
-    );
+
+  const patch: { state?: string; geopoliticalZone?: string; ninHash?: string } = {};
+
+  if (input.state !== undefined) {
+    if (current.state) {
+      throw new AppError(
+        'VALIDATION_ERROR',
+        'Your state is already set. Contact support if it needs to change.',
+        'state',
+      );
+    }
+    const resolved = await resolveState(input.state);
+    if (!resolved) {
+      throw new AppError('VALIDATION_ERROR', 'Choose your state.', 'state');
+    }
+    patch.state = resolved.name;
+    patch.geopoliticalZone = resolved.zone;
   }
 
-  const resolved = await resolveState(input.state);
-  if (!resolved) {
-    throw new AppError('VALIDATION_ERROR', 'Choose your state.', 'state');
+  if (input.ninHash !== undefined) {
+    // Once set, a NIN is permanent. Allowing it to change would let one person
+    // cycle through identities and rate repeatedly.
+    if (current.ninHash) {
+      throw new AppError(
+        'VALIDATION_ERROR',
+        'Your NIN is already on file and cannot be changed.',
+        'ninHash',
+      );
+    }
+    patch.ninHash = input.ninHash;
   }
 
+  try {
+    const [row] = await authDb
+      .update(users)
+      .set(patch)
+      .where(eq(users.id, userId))
+      .returning();
+
+    return toPublicUser(row);
+  } catch (err) {
+    // Someone else already registered this NIN.
+    translateUserDuplicate(err);
+  }
+}
+
+/** Has this account supplied a NIN? The gate on rating. */
+export async function userHasNin(userId: string): Promise<boolean> {
   const [row] = await authDb
-    .update(users)
-    .set({ state: resolved.name, geopoliticalZone: resolved.zone })
+    .select({ ninHash: users.ninHash })
+    .from(users)
     .where(eq(users.id, userId))
-    .returning();
+    .limit(1);
 
-  return toPublicUser(row);
+  return Boolean(row?.ninHash);
 }
 
 export function toPublicUser(user: User): PublicUser {
@@ -89,6 +124,7 @@ export function toPublicUser(user: User): PublicUser {
     role: user.role,
     state: user.state,
     geopoliticalZone: user.geopoliticalZone,
+    hasNin: Boolean(user.ninHash),
     isActive: user.isActive,
     createdAt: user.createdAt.toISOString(),
   };
@@ -132,7 +168,7 @@ export async function registerUser(input: RegisterInput): Promise<User> {
         fullName: input.fullName,
         phoneNumber: input.phoneNumber,
         email: input.email,
-        ninHash: input.ninHash,
+        ninHash: input.ninHash ?? null,
         role: 'citizen',
         state: resolved?.name ?? null,
         geopoliticalZone: resolved?.zone ?? input.geopoliticalZone ?? null,
@@ -183,7 +219,7 @@ async function registerWithInviteCode(input: RegisterInput, rawCode: string): Pr
           fullName: input.fullName,
           phoneNumber: input.phoneNumber,
           email: input.email,
-          ninHash: input.ninHash,
+          ninHash: input.ninHash ?? null,
           role: code.role,
           // Geographic assignment comes from the code, not the client.
           state: code.state,

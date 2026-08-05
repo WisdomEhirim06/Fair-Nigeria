@@ -21,10 +21,12 @@ function Eyebrow({ children }: { children: ReactNode }) {
 export function RatingCard({
   election,
   rating,
+  hasNin,
   onStartRating,
 }: {
   election: Election | null | undefined;
   rating: Rating | null | undefined;
+  hasNin: boolean;
   onStartRating: () => void;
 }) {
   // Still fetching.
@@ -80,6 +82,23 @@ export function RatingCard({
         <a href="/results" className={CTA}>
           View results and ratings
         </a>
+      </div>
+    );
+  }
+
+  // Open, but the account can't rate yet. Saying so here beats letting someone
+  // fill in five questions and get rejected on submit.
+  if (!hasNin) {
+    return (
+      <div className={CARD}>
+        <Eyebrow>One step first</Eyebrow>
+        <h2 className="mt-3 text-[clamp(1.5rem,3.5vw,2.1rem)] font-extrabold leading-[1.1] tracking-[-0.02em]">
+          Add your NIN to rate.
+        </h2>
+        <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
+          It’s how we make sure each person rates once. You’ll find it under “Your details” below —
+          it takes a moment, and you only do it once.
+        </p>
       </div>
     );
   }

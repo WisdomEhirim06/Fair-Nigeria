@@ -149,7 +149,7 @@ export function StaffRegisterForm({ onSubmit }: { onSubmit: (phone: string) => v
       <button
         type="submit"
         disabled={submitting}
-        className="mt-7 flex h-14 w-full items-center justify-center rounded-full bg-ink text-[1rem] font-semibold text-cream transition hover:bg-lime hover:text-ink disabled:opacity-60"
+        className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-ink text-[0.95rem] font-semibold text-cream transition-colors hover:bg-forest-deep disabled:opacity-60"
       >
         {submitting ? 'Sending code…' : 'Create account'}
       </button>

@@ -9,6 +9,7 @@ export interface ApiUser {
   role: Role;
   state: string | null;
   geopoliticalZone: string | null;
+  hasNin: boolean;
   isActive: boolean;
   createdAt: string;
 }

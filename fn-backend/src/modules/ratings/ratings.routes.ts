@@ -1,15 +1,20 @@
 import { Router } from 'express';
 
 import { requireAuth } from '../../shared/middleware/require-auth';
+import { requireNin } from '../../shared/middleware/require-nin';
 import { validate } from '../../shared/middleware/validate';
 import { getMyRatingHandler, submitRatingHandler } from './ratings.controller';
 import { myRatingQuerySchema, submitRatingBodySchema } from './ratings.schemas';
 
 export const ratingsRouter = Router();
 
-// Any signed-in person may rate — staff are citizens too. Still one rating per
-// person per election, and each reads back only their own.
-ratingsRouter.post('/', requireAuth, validate(submitRatingBodySchema), submitRatingHandler);
+ratingsRouter.post(
+  '/',
+  requireAuth,
+  requireNin,
+  validate(submitRatingBodySchema),
+  submitRatingHandler,
+);
 ratingsRouter.get(
   '/me',
   requireAuth,

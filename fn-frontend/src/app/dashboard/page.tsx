@@ -65,6 +65,7 @@ function DashboardInner() {
           <RatingCard
             election={election}
             rating={rating}
+            hasNin={Boolean(user?.hasNin)}
             onStartRating={() => setDialogOpen(true)}
           />
 

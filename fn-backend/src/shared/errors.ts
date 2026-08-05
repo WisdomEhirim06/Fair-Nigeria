@@ -15,6 +15,7 @@ export const ERROR_CODES = {
   DUPLICATE_SLUG: { http: 409, code: 'DUPLICATE_SLUG' },
   ALREADY_RATED: { http: 409, code: 'ALREADY_RATED' },
   RATING_NOT_OPEN: { http: 422, code: 'RATING_NOT_OPEN' },
+  NIN_REQUIRED: { http: 422, code: 'NIN_REQUIRED' },
   UPLOAD_NOT_OPEN: { http: 422, code: 'UPLOAD_NOT_OPEN' },
   PARTIES_LOCKED: { http: 409, code: 'PARTIES_LOCKED' },
   NO_PARTIES_CONFIGURED: { http: 422, code: 'NO_PARTIES_CONFIGURED' },

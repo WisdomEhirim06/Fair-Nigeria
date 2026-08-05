@@ -1,23 +1,20 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 
-import { ApiError, listStates, registerCitizen } from '@/lib/api';
+import { ApiError, registerCitizen } from '@/lib/api';
 import { AuthField } from './AuthField';
 import { PhoneField } from './PhoneField';
-import { StateSelect } from './StateSelect';
-import { NIGERIAN_STATES } from './states';
 
-type FieldKey = 'fullName' | 'email' | 'nin' | 'phone' | 'state';
+
+type FieldKey = 'fullName' | 'email' | 'phone';
 type Errors = Partial<Record<FieldKey, string>>;
 
 /** Maps a backend error `field` to the matching form field. */
 const FIELD_MAP: Record<string, FieldKey> = {
   fullName: 'fullName',
   email: 'email',
-  ninHash: 'nin',
   phoneNumber: 'phone',
-  state: 'state',
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,20 +23,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [nin, setNin] = useState('');
   const [phone, setPhone] = useState('');
-  const [state, setState] = useState('');
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
-  const [states, setStates] = useState<readonly string[]>(NIGERIAN_STATES);
-
-  // Prefer the live state list; fall back to the static one if the call fails.
-  useEffect(() => {
-    listStates()
-      .then((rows) => setStates(rows.map((r) => r.name)))
-      .catch(() => undefined);
-  }, []);
 
   function clear(key: FieldKey) {
     setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
@@ -50,9 +37,7 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
     const next: Errors = {};
     if (fullName.trim().length < 2) next.fullName = 'Enter your full name.';
     if (!EMAIL_RE.test(email)) next.email = 'Enter a valid email — your code is sent here.';
-    if (!/^\d{11}$/.test(nin)) next.nin = 'Your NIN is 11 digits.';
     if (!/^\d{10}$/.test(phone)) next.phone = 'Enter the 10 digits after +234.';
-    if (!state) next.state = 'Choose your state.';
     return next;
   }
 
@@ -73,13 +58,10 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
 
     setSubmitting(true);
     try {
-      // The NIN is hashed inside registerCitizen before it leaves the device.
       await registerCitizen({
         fullName: fullName.trim(),
         phoneNumber: `+234${phone}`,
         email: email.trim(),
-        nin,
-        state,
       });
       onSubmit(`+234${phone}`);
     } catch (err) {
@@ -95,8 +77,7 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
         Create your account
       </h1>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
-        It takes a minute. Your NIN is hashed on your device, never sent or stored. We’ll email you
-        a code to confirm it’s really you.
+        Three things and you’re in. We’ll email you a code to confirm it’s really you.
       </p>
 
       <div className="mt-7 space-y-3.5">
@@ -121,18 +102,6 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
           error={errors.email}
           autoComplete="email"
         />
-        <AuthField
-          label="NIN (11 digits)"
-          value={nin}
-          onChange={(v) => {
-            setNin(v);
-            clear('nin');
-          }}
-          error={errors.nin}
-          inputMode="numeric"
-          maxLength={11}
-          digitsOnly
-        />
         <PhoneField
           value={phone}
           onChange={(v) => {
@@ -140,15 +109,6 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
             clear('phone');
           }}
           error={errors.phone}
-        />
-        <StateSelect
-          value={state}
-          onChange={(v) => {
-            setState(v);
-            clear('state');
-          }}
-          error={errors.state}
-          options={states}
         />
       </div>
 
@@ -159,7 +119,7 @@ export function RegisterForm({ onSubmit }: { onSubmit: (phone: string) => void }
       <button
         type="submit"
         disabled={submitting}
-        className="mt-7 flex h-14 w-full items-center justify-center rounded-full bg-ink text-[1rem] font-semibold text-cream transition hover:bg-lime hover:text-ink disabled:opacity-60"
+        className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-ink text-[0.95rem] font-semibold text-cream transition-colors hover:bg-forest-deep disabled:opacity-60"
       >
         {submitting ? 'Sending code…' : 'Create account'}
       </button>
