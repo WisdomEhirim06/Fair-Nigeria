@@ -1,0 +1,1 @@
+ALTER TABLE "users" ALTER COLUMN "nin_hash" DROP NOT NULL;
