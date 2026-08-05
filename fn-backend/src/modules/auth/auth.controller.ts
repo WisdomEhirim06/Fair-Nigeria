@@ -4,8 +4,8 @@ import { clearRefreshCookie, REFRESH_COOKIE_NAME, setRefreshCookie } from '../..
 import { AppError } from '../../shared/errors';
 import { logger } from '../../shared/logger';
 import { successEnvelope } from '../../shared/response';
-import type { RegisterInput } from './auth.schemas';
-import { getUserById, registerUser, toPublicUser } from './auth.service';
+import type { AddMyDetailsInput, RegisterInput } from './auth.schemas';
+import { addMyDetails, getUserById, registerUser, toPublicUser } from './auth.service';
 import type { RequestOtpInput, VerifyOtpInput } from './otp.schemas';
 import {
   requestOtp,
@@ -89,6 +89,16 @@ export const getMeHandler: RequestHandler = async (req, res, next) => {
     const user = await getUserById(req.user!.id);
     const requestId = req.id as unknown as string;
     res.json(successEnvelope(user, requestId));
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PATCH /auth/me/details — fill in a detail left blank at registration.
+export const addMyDetailsHandler: RequestHandler = async (req, res, next) => {
+  try {
+    const user = await addMyDetails(req.user!.id, req.body as AddMyDetailsInput);
+    res.json(successEnvelope(user, req.id as unknown as string));
   } catch (err) {
     next(err);
   }

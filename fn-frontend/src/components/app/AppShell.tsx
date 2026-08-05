@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { navFor, roleLabel } from '@/lib/auth/roles';
 import { useSession } from '@/lib/session/SessionProvider';
-import { NavGlyph } from './NavIcons';
 
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -23,8 +22,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="text-[0.98rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
             </span>
 
-            {/* Desktop nav — the bottom bar covers mobile. */}
-            <nav className="hidden items-center gap-7 md:flex">
+            {/*
+              One nav at every width. With the trail moved to the footer each
+              role has two destinations, which fits the bar on a phone — so the
+              fixed bottom tab row that used to cover mobile is gone, and with
+              it the permanent strip of screen it occupied.
+            */}
+            <nav aria-label="Main" className="flex items-center gap-5 sm:gap-7">
               {links.map((l) => {
                 const active = pathname === l.href;
                 return (
@@ -51,41 +55,40 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* Bottom bar's height is reserved so content never hides behind it. */}
-      <main id="main" className="pb-24 md:pb-0">
-        {children}
-      </main>
+      <main id="main">{children}</main>
 
-      <nav
-        aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
-      >
-        <div className="flex items-stretch">
-          {links.map((l) => {
-            const active = pathname === l.href;
-            return (
-              <a
-                key={l.href}
-                href={l.href}
-                aria-current={active ? 'page' : undefined}
-                className={`flex flex-1 flex-col items-center gap-1 py-2.5 transition-colors ${
-                  active ? 'text-ink' : 'text-ink/45'
-                }`}
-              >
-                <NavGlyph icon={l.icon} size={21} />
-                <span className="text-[0.68rem] font-semibold tracking-[0.01em]">{l.label}</span>
-                <span
-                  className={`h-0.5 w-6 rounded-full transition-colors ${
-                    active ? 'bg-lime' : 'bg-transparent'
-                  }`}
-                  aria-hidden
-                />
-              </a>
-            );
-          })}
-        </div>
-      </nav>
+      <AppFooter />
     </div>
+  );
+}
+
+/**
+ * Where the quiet links live.
+ *
+ * The transparency trail sits here rather than in the nav: it's the thing you
+ * go looking for when you want to check something, not a destination anyone
+ * needs day to day.
+ */
+function AppFooter() {
+  return (
+    <footer className="mt-16 border-t border-ink/10">
+      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-5 py-6 md:px-8">
+        <p className="text-[0.8rem] text-muted">
+          An independent citizen record. Not a replacement for INEC.
+        </p>
+        <nav className="flex flex-wrap items-center gap-5 text-[0.8rem] font-medium text-ink/60">
+          <a href="/articles" className="transition-colors hover:text-ink">
+            Civic library
+          </a>
+          <a href="/sheets" className="transition-colors hover:text-ink">
+            Result sheets
+          </a>
+          <a href="/audit" className="transition-colors hover:text-ink">
+            Transparency trail
+          </a>
+        </nav>
+      </div>
+    </footer>
   );
 }
 

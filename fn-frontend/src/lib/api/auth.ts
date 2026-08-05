@@ -82,3 +82,14 @@ export async function logout(): Promise<void> {
 export async function getMe(): Promise<ApiUser> {
   return request<ApiUser>('/auth/me', { method: 'GET' });
 }
+
+/**
+ * Fill in a detail left blank at registration. Add-only — the server rejects a
+ * field that already has a value, so this can't edit an existing profile.
+ */
+export async function addMyDetails(input: { state: string }): Promise<ApiUser> {
+  return request<ApiUser>('/auth/me/details', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}

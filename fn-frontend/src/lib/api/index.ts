@@ -2,6 +2,7 @@
 
 export { ApiError } from './client';
 export {
+  addMyDetails,
   getMe,
   logout,
   refresh,

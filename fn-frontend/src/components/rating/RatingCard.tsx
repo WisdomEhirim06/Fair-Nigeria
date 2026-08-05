@@ -5,9 +5,9 @@ import type { ReactNode } from 'react';
 import type { Election, Rating } from '@/lib/api';
 import { RATING_QUESTIONS } from './questions';
 
-const CARD = 'rounded-3xl border border-ink/10 bg-white p-7 shadow-[0_16px_40px_rgba(15,31,23,0.06)]';
+const CARD = 'rounded-3xl border border-ink/10 bg-white p-6 sm:p-7';
 const CTA =
-  'mt-6 inline-flex h-12 items-center justify-center rounded-full bg-ink px-7 font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-lime hover:text-ink';
+  'mt-6 inline-flex h-12 items-center justify-center rounded-full bg-ink px-7 font-semibold text-cream transition-colors hover:bg-forest-deep';
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
@@ -51,7 +51,7 @@ export function RatingCard({
           When it does, you can rate what you saw where you voted. Meanwhile, get ready, learn what
           should and shouldn’t happen.
         </p>
-        <a href="/#civic" className={CTA}>
+        <a href="/articles" className={CTA}>
           Read the civic articles
         </a>
       </div>

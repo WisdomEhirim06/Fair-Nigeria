@@ -6,7 +6,7 @@ import { inviteCodes, users, type User } from '../../db/auth/schema';
 import { normalizeInviteCode, sha256Hex } from '../../shared/crypto';
 import { isUniqueViolation } from '../../shared/db-errors';
 import { AppError } from '../../shared/errors';
-import type { PublicUser, RegisterInput } from './auth.schemas';
+import type { AddMyDetailsInput, PublicUser, RegisterInput } from './auth.schemas';
 
 
 async function resolveState(name?: string): Promise<{ name: string; zone: string } | null> {
@@ -38,6 +38,46 @@ export async function getUserById(id: string): Promise<PublicUser> {
   }
 
   return toPublicUser(user);
+}
+
+/**
+ * Fill in a detail the account is missing. Never overwrites one already set —
+ * a populated field is rejected rather than silently replaced, so this can't
+ * become a general-purpose profile editor by accident.
+ */
+export async function addMyDetails(
+  userId: string,
+  input: AddMyDetailsInput,
+): Promise<PublicUser> {
+  const [current] = await authDb
+    .select()
+    .from(users)
+    .where(and(eq(users.id, userId), eq(users.isActive, true)))
+    .limit(1);
+
+  if (!current) {
+    throw new AppError('UNAUTHORIZED', 'Account not found or inactive.');
+  }
+  if (current.state) {
+    throw new AppError(
+      'VALIDATION_ERROR',
+      'Your state is already set. Contact support if it needs to change.',
+      'state',
+    );
+  }
+
+  const resolved = await resolveState(input.state);
+  if (!resolved) {
+    throw new AppError('VALIDATION_ERROR', 'Choose your state.', 'state');
+  }
+
+  const [row] = await authDb
+    .update(users)
+    .set({ state: resolved.name, geopoliticalZone: resolved.zone })
+    .where(eq(users.id, userId))
+    .returning();
+
+  return toPublicUser(row);
 }
 
 export function toPublicUser(user: User): PublicUser {

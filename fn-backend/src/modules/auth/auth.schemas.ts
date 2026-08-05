@@ -27,6 +27,22 @@ export const registerBodySchema = z
 
 export type RegisterInput = z.infer<typeof registerBodySchema>;
 
+/**
+ * Details a user may *add* to their own account after registering.
+ *
+ * Add, not edit. Name, phone, and email are fixed once set — phone is the login
+ * identity, and letting an account quietly change hands would undermine the
+ * one-person-one-rating guarantee the whole record rests on. This exists so a
+ * field left blank at signup can be filled in later without a support request.
+ */
+export const addMyDetailsBodySchema = z
+  .object({
+    state: z.string().trim().min(2).max(60),
+  })
+  .strict();
+
+export type AddMyDetailsInput = z.infer<typeof addMyDetailsBodySchema>;
+
 /** Public-safe user shape returned by auth endpoints. Never includes ninHash or fcmToken. */
 export const publicUserSchema = z.object({
   id: z.string().uuid(),

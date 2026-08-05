@@ -42,29 +42,29 @@ export interface NavItem {
 
 /**
  * The links each role sees in the app shell. The role's own workspace comes
- * first and is always present, so there is never a dead end: wherever you are —
- * results, audit — one tap returns you to your work.
+ * first and is always present, so there is never a dead end: wherever you are,
+ * one tap returns you to your work.
+ *
+ * The transparency trail is deliberately absent. It's a backstop for someone
+ * who wants to check a number, not somewhere people need to visit — beta
+ * testers read it as clutter. It lives in the shell's footer instead.
  */
 export const ROLE_NAV: Record<Role, NavItem[]> = {
   citizen: [
     { href: '/dashboard', label: 'Home', icon: 'home' },
     { href: '/results', label: 'Results', icon: 'results' },
-    { href: '/audit', label: 'Audit', icon: 'audit' },
   ],
   yiaga_official: [
     { href: '/upload', label: 'Upload', icon: 'upload' },
     { href: '/results', label: 'Results', icon: 'results' },
-    { href: '/audit', label: 'Audit', icon: 'audit' },
   ],
   yiaga_transcriber: [
     { href: '/transcribe', label: 'Transcribe', icon: 'transcribe' },
     { href: '/results', label: 'Results', icon: 'results' },
-    { href: '/audit', label: 'Audit', icon: 'audit' },
   ],
   super_admin: [
     { href: '/admin', label: 'Overview', icon: 'admin' },
     { href: '/results', label: 'Results', icon: 'results' },
-    { href: '/audit', label: 'Audit', icon: 'audit' },
   ],
 };
 

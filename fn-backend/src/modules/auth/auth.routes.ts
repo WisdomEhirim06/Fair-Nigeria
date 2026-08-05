@@ -4,6 +4,7 @@ import { requireAuth } from '../../shared/middleware/require-auth';
 import { otpRateLimiter } from '../../shared/middleware/rate-limit';
 import { validate } from '../../shared/middleware/validate';
 import {
+  addMyDetailsHandler,
   getMeHandler,
   logoutHandler,
   refreshHandler,
@@ -11,7 +12,7 @@ import {
   requestOtpHandler,
   verifyOtpHandler,
 } from './auth.controller';
-import { registerBodySchema } from './auth.schemas';
+import { addMyDetailsBodySchema, registerBodySchema } from './auth.schemas';
 import { requestOtpBodySchema, verifyOtpBodySchema } from './otp.schemas';
 
 
@@ -30,3 +31,12 @@ authRouter.post('/logout', logoutHandler);
 
 // Authenticated profile — requires a valid Bearer token
 authRouter.get('/me', requireAuth, getMeHandler);
+
+// Fill in a detail left blank at registration. Add-only: a field already set
+// is rejected, so this is not a general profile editor.
+authRouter.patch(
+  '/me/details',
+  requireAuth,
+  validate(addMyDetailsBodySchema),
+  addMyDetailsHandler,
+);
