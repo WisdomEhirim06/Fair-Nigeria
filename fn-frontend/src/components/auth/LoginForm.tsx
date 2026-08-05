@@ -32,8 +32,9 @@ export function LoginForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
+
       <h1 className="text-[clamp(1.9rem,4vw,2.6rem)] font-extrabold leading-[1.05] tracking-[-0.03em]">
-        Welcome back
+        Sign in
       </h1>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-muted">
         Enter your phone number and we’ll email you a code to sign in.
@@ -58,7 +59,7 @@ export function LoginForm({ onSubmit }: { onSubmit: (phone: string) => void }) {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-7 flex h-14 w-full items-center justify-center rounded-full bg-ink text-[1rem] font-semibold text-cream transition hover:bg-lime hover:text-ink disabled:opacity-60"
+        className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-ink text-[0.95rem] font-semibold text-cream transition-colors hover:bg-forest-deep disabled:opacity-60"
       >
         {submitting ? 'Sending code…' : 'Send code'}
       </button>

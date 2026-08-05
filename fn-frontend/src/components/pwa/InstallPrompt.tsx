@@ -62,8 +62,8 @@ export function InstallPrompt() {
   if (!visible || !prompt) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:bottom-4">
-      <div className="pointer-events-auto w-full max-w-[420px] rounded-2xl border border-ink/12 bg-white p-5 shadow-[0_18px_44px_rgba(15,31,23,0.16)]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:inset-x-auto md:bottom-5 md:right-5 md:p-0">
+      <div className="pointer-events-auto w-full max-w-[420px] rounded-2xl border border-ink/12 bg-white p-5 shadow-[0_18px_44px_rgba(15,31,23,0.16)] md:w-[380px]">
         <div className="flex items-start gap-3.5">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-forest-deep">
             <span className="h-4 w-4 rounded-full bg-lime" aria-hidden />

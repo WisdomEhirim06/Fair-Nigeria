@@ -16,7 +16,8 @@ export function SiteNav() {
   const [open, setOpen] = useState(false);
   const { user } = useSession();
 
-  const ctaHref = user ? homePathFor(user.role) : '/register';
+  // Sign-in, not sign-up — the login screen offers both routes onward.
+  const ctaHref = user ? homePathFor(user.role) : '/login';
   const ctaLabel = user ? 'Your dashboard' : 'Rate your election';
 
   return (

@@ -46,8 +46,8 @@ export function ServiceWorkerManager() {
   if (!waiting) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:bottom-4">
-      <div className="pointer-events-auto flex w-full max-w-[420px] items-center gap-3 rounded-2xl border border-ink/12 bg-forest-deep px-4 py-3 text-cream shadow-[0_18px_40px_rgba(15,31,23,0.28)]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:inset-x-auto md:bottom-5 md:right-5 md:p-0">
+      <div className="pointer-events-auto flex w-full max-w-[420px] items-center gap-3 rounded-2xl border border-ink/12 bg-forest-deep px-4 py-3 text-cream shadow-[0_18px_40px_rgba(15,31,23,0.28)] md:w-[380px]">
         <span className="h-2 w-2 shrink-0 rounded-full bg-lime" aria-hidden />
         <p className="flex-1 text-[0.86rem] font-medium leading-snug">
           A new version is ready.
