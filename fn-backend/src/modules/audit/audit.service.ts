@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq, inArray } from 'drizzle-orm';
 
 import { appDb } from '../../db';
 import { auditLog } from '../../db/app/schema';
@@ -50,16 +50,55 @@ export async function writeAuditSafe(entry: AuditEntry): Promise<void> {
 }
 
 
+const PUBLIC_AUDIT_ACTIONS = [
+  'election.create',
+  'election.status_change',
+  'election.party_add',
+  'election.party_update',
+  'election.party_remove',
+  'sheet.upload',
+  'sheet.flag',
+  'consensus.resolve',
+] as const;
+
+const PUBLIC_METADATA_KEYS = new Set([
+  'puCode',
+  'fileHash',
+  'name',
+  'type',
+  'status',
+  'from',
+  'to',
+  'abbreviation',
+  'outcome',
+  'flagCount',
+]);
+
+function publicMetadata(raw: unknown): Record<string, unknown> | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (PUBLIC_METADATA_KEYS.has(key)) out[key] = value;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
 
 export async function listAuditLog(
   query: AuditQuery,
 ): Promise<{ entries: PublicAuditEntry[]; pagination: Pagination }> {
+  const actionFilter =
+    query.action && (PUBLIC_AUDIT_ACTIONS as readonly string[]).includes(query.action)
+      ? eq(auditLog.action, query.action)
+      : query.action
+        ? eq(auditLog.action, '__none__')
+        : inArray(auditLog.action, [...PUBLIC_AUDIT_ACTIONS]);
+
   const filters = [
-    query.action ? eq(auditLog.action, query.action) : undefined,
+    actionFilter,
     query.entityType ? eq(auditLog.entityType, query.entityType) : undefined,
     query.entityId ? eq(auditLog.entityId, query.entityId) : undefined,
   ].filter(Boolean);
-  const where = filters.length ? and(...filters) : undefined;
+  const where = and(...filters);
 
   const [{ total }] = await appDb.select({ total: count() }).from(auditLog).where(where);
 
@@ -85,7 +124,7 @@ export async function listAuditLog(
     entityType: r.entityType,
     entityId: r.entityId,
     actorRole: r.actorRole,
-    metadata: (r.metadata as Record<string, unknown> | null) ?? null,
+    metadata: publicMetadata(r.metadata),
     createdAt: r.createdAt.toISOString(),
   }));
 

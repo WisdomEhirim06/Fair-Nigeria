@@ -6,57 +6,96 @@ import { listAudit, type AuditEntry } from '@/lib/api';
 
 const LIMIT = 25;
 
-// Human labels for the actions we record. Unknown actions fall back to a
-// prettified version of the raw code, so new backend actions still render.
-const ACTION_LABELS: Record<string, string> = {
-  'election.create': 'Election created',
-  'election.status_change': 'Election status changed',
-  'election.party_add': 'Party added',
-  'election.party_update': 'Party updated',
-  'election.party_remove': 'Party removed',
-  'article.create': 'Article created',
-  'article.update': 'Article updated',
-  'article.publish': 'Article published',
-  'article.unpublish': 'Article unpublished',
-  'sheet.upload': 'Result sheet uploaded',
-  'sheet.flag': 'Sheet flagged',
-  'transcription.entry': 'Reading submitted',
-  'consensus.resolve': 'Sheet resolved by agreement',
-};
+/**
+ * One filter, in the reader's language.
+ *
+ * This was two dropdowns — a list of dotted action codes and a raw entity-type
+ * list. Beta testers couldn't tell what either was for. The trail is now
+ * scoped server-side to integrity-relevant actions, so this only has to split
+ * the two things a person actually asks about.
+ */
+const SCOPES = [
+  { value: '', label: 'Everything' },
+  { value: 'sheet', label: 'Result sheets' },
+  { value: 'election', label: 'Elections' },
+] as const;
 
 const ROLE_LABELS: Record<string, string> = {
-  super_admin: 'Admin',
-  system: 'System',
-  yiaga_official: 'Field officer',
-  yiaga_transcriber: 'Transcriber',
-  citizen: 'Citizen',
+  super_admin: 'An administrator',
+  system: 'The system',
+  yiaga_official: 'A field officer',
+  yiaga_transcriber: 'A transcriber',
+  citizen: 'A citizen',
 };
 
-const ACTION_OPTIONS = Object.entries(ACTION_LABELS);
-const ENTITY_OPTIONS = ['election', 'sheet', 'article'];
-
-function actionLabel(action: string) {
-  return ACTION_LABELS[action] ?? action.replace(/[._]/g, ' ');
+function actorLabel(role: string | null): string {
+  return role ? (ROLE_LABELS[role] ?? 'Someone') : 'A member of the public';
 }
 
-function roleLabel(role: string | null) {
-  return role ? (ROLE_LABELS[role] ?? role) : 'Member of the public';
+function str(meta: Record<string, unknown> | null, key: string): string | null {
+  const v = meta?.[key];
+  return typeof v === 'string' && v.trim() ? v : null;
 }
-function categoryColor(action: string) {
-  switch (action.split('.')[0]) {
-    case 'consensus':
-    case 'sheet':
-      return 'var(--color-lime)';
-    case 'transcription':
-      return 'var(--color-leaf)';
-    case 'election':
-      return 'var(--color-forest)';
-    case 'article':
-      return 'var(--color-gold)';
+
+/**
+ * A full sentence describing what happened, rather than an action code and a
+ * blob of JSON. Anything unrecognised falls back to a readable version of the
+ * raw action so a newly-added backend event never renders as nothing.
+ */
+function describe(entry: AuditEntry): string {
+  const who = actorLabel(entry.actorRole);
+  const m = entry.metadata;
+
+  switch (entry.action) {
+    case 'election.create': {
+      const name = str(m, 'name');
+      return name ? `${who} created the election “${name}”.` : `${who} created an election.`;
+    }
+    case 'election.status_change': {
+      const from = str(m, 'from');
+      const to = str(m, 'to');
+      if (from && to) return `${who} moved an election from ${from} to ${to}.`;
+      return to ? `${who} set an election to ${to}.` : `${who} changed an election's status.`;
+    }
+    case 'election.party_add': {
+      const abbr = str(m, 'abbreviation');
+      return abbr ? `${who} added ${abbr} to the ballot.` : `${who} added a party to the ballot.`;
+    }
+    case 'election.party_update':
+      return `${who} updated a party on the ballot.`;
+    case 'election.party_remove':
+      return `${who} removed a party from the ballot.`;
+    case 'sheet.upload': {
+      const pu = str(m, 'puCode');
+      return pu
+        ? `${who} uploaded the result sheet for polling unit ${pu}.`
+        : `${who} uploaded a result sheet.`;
+    }
+    case 'sheet.flag':
+      return `${who} flagged a result sheet for review.`;
+    case 'consensus.resolve': {
+      const outcome = str(m, 'outcome');
+      if (outcome === 'verified') {
+        return 'Two transcribers read this sheet the same way — its figures are now published.';
+      }
+      if (outcome === 'disputed') {
+        return 'Transcribers did not agree on this sheet, so it was held back for review.';
+      }
+      return 'A sheet was resolved.';
+    }
     default:
-      return 'var(--color-muted)';
+      return `${who} — ${entry.action.replace(/[._]/g, ' ')}.`;
   }
 }
+
+/** Sheets and consensus are the count itself; elections are the setup around it. */
+function accentFor(action: string): string {
+  const family = action.split('.')[0];
+  if (family === 'consensus') return 'var(--color-leaf)';
+  if (family === 'sheet') return 'var(--color-lime)';
+  return 'var(--color-forest)';
+}
+
 function dayKey(iso: string) {
   return new Date(iso).toLocaleDateString('en-NG', {
     weekday: 'short',
@@ -70,8 +109,7 @@ function clock(iso: string) {
 }
 
 export function AuditViewer() {
-  const [action, setAction] = useState('');
-  const [entityType, setEntityType] = useState('');
+  const [scope, setScope] = useState('');
 
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [page, setPage] = useState(1);
@@ -79,11 +117,10 @@ export function AuditViewer() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
 
-  // Bumped on every filter change, so a page that lands after the filters moved
+  // Bumped on every filter change, so a page that lands after the filter moved
   // is discarded instead of being appended to a list it doesn't belong to.
   const requestTicket = useRef(0);
 
-  // Reload from the first page whenever a filter changes.
   useEffect(() => {
     const ticket = ++requestTicket.current;
     setLoading(true);
@@ -91,8 +128,7 @@ export function AuditViewer() {
       const rows = await listAudit({
         page: 1,
         limit: LIMIT,
-        action: action || undefined,
-        entityType: entityType || undefined,
+        entityType: scope || undefined,
       }).catch(() => []);
       if (requestTicket.current !== ticket) return;
       setEntries(rows);
@@ -100,7 +136,7 @@ export function AuditViewer() {
       setHasMore(rows.length === LIMIT);
       setLoading(false);
     })();
-  }, [action, entityType]);
+  }, [scope]);
 
   async function loadMore() {
     const ticket = requestTicket.current;
@@ -109,8 +145,7 @@ export function AuditViewer() {
     const rows = await listAudit({
       page: next,
       limit: LIMIT,
-      action: action || undefined,
-      entityType: entityType || undefined,
+      entityType: scope || undefined,
     }).catch(() => []);
     setLoadingMore(false);
     if (requestTicket.current !== ticket) return;
@@ -130,49 +165,26 @@ export function AuditViewer() {
     return out;
   }, [entries]);
 
-  const filtered = Boolean(action || entityType);
-  const selectClass =
-    'h-11 rounded-xl border border-ink/15 bg-white px-3 text-[0.9rem] text-ink outline-none focus:border-lime focus:ring-2 focus:ring-lime/20';
-
   return (
     <div>
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <select value={action} onChange={(e) => setAction(e.target.value)} className={selectClass}>
-          <option value="">All actions</option>
-          {ACTION_OPTIONS.map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={entityType}
-          onChange={(e) => setEntityType(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">Anything</option>
-          {ENTITY_OPTIONS.map((t) => (
-            <option key={t} value={t}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </option>
-          ))}
-        </select>
-        {filtered ? (
+      <div className="flex flex-wrap items-center gap-2">
+        {SCOPES.map((s) => (
           <button
+            key={s.value}
             type="button"
-            onClick={() => {
-              setAction('');
-              setEntityType('');
-            }}
-            className="h-11 rounded-xl px-3 text-[0.85rem] font-semibold text-muted transition-colors hover:text-ink"
+            onClick={() => setScope(s.value)}
+            aria-pressed={scope === s.value}
+            className={`min-h-[44px] rounded-full px-4 text-[0.88rem] font-semibold transition-colors ${
+              scope === s.value
+                ? 'bg-ink text-cream'
+                : 'border border-ink/15 text-ink/70 hover:border-ink/40 hover:text-ink'
+            }`}
           >
-            Clear
+            {s.label}
           </button>
-        ) : null}
+        ))}
       </div>
 
-      {/* Trail */}
       <div className="mt-8">
         {loading ? (
           <div className="flex justify-center py-16">
@@ -183,9 +195,12 @@ export function AuditViewer() {
             />
           </div>
         ) : entries.length === 0 ? (
-          <p className="py-12 text-center text-[0.95rem] text-muted">
-            {filtered ? 'Nothing matches these filters.' : 'No actions recorded yet.'}
-          </p>
+          <div className="rounded-2xl border border-dashed border-ink/20 bg-white/50 px-6 py-16 text-center">
+            <p className="text-[1rem] font-semibold">Nothing recorded yet</p>
+            <p className="mx-auto mt-1.5 max-w-[42ch] text-[0.9rem] text-muted">
+              Once an election is set up and sheets start arriving, every step will appear here.
+            </p>
+          </div>
         ) : (
           groups.map((group) => (
             <div key={group.day} className="mb-8">
@@ -198,44 +213,25 @@ export function AuditViewer() {
                     <div className="relative flex justify-center">
                       <span className="absolute inset-y-0 w-px bg-ink/12" aria-hidden />
                       <span
-                        className="relative z-10 mt-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-cream"
-                        style={{ background: categoryColor(e.action) }}
+                        className="relative z-10 mt-2 h-2.5 w-2.5 rounded-full ring-4 ring-cream"
+                        style={{ background: accentFor(e.action) }}
                         aria-hidden
                       />
                     </div>
                     <div className="pb-6">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <span className="text-[0.98rem] font-semibold">{actionLabel(e.action)}</span>
-                        <span className="shrink-0 font-mono text-[0.72rem] text-muted">
-                          {clock(e.createdAt)}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-[0.8rem] text-muted">
-                        <span className="rounded bg-ink/[0.06] px-2 py-0.5 font-medium">
-                          {roleLabel(e.actorRole)}
-                        </span>
-                        <span className="capitalize">{e.entityType}</span>
-                        {/* Sheet entries link through to the paper itself. The id
-                            builds the link but is never shown. */}
+                      <p className="text-[0.98rem] leading-relaxed">{describe(e)}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[0.8rem] text-muted">
+                        <span className="font-mono">{clock(e.createdAt)}</span>
+                        {/* The id builds the link but is never shown. */}
                         {e.entityType === 'sheet' && e.entityId ? (
                           <a
                             href={`/sheets/${e.entityId}`}
-                            className="font-medium text-leaf transition-colors hover:text-forest-deep"
+                            className="font-semibold text-leaf transition-colors hover:text-forest-deep"
                           >
-                            View this sheet
+                            See this sheet
                           </a>
                         ) : null}
                       </div>
-                      {e.metadata && Object.keys(e.metadata).length > 0 ? (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer text-[0.78rem] font-medium text-leaf">
-                            See details
-                          </summary>
-                          <pre className="mt-2 overflow-x-auto rounded-lg bg-ink/[0.04] p-3 font-mono text-[0.68rem] leading-relaxed text-ink/80">
-                            {JSON.stringify(e.metadata, null, 2)}
-                          </pre>
-                        </details>
-                      ) : null}
                     </div>
                   </Fragment>
                 ))}
@@ -250,9 +246,9 @@ export function AuditViewer() {
               type="button"
               onClick={() => void loadMore()}
               disabled={loadingMore}
-              className="rounded-full border border-ink/20 px-6 py-3 text-[0.9rem] font-semibold text-ink transition-colors hover:border-lime hover:bg-lime/10 disabled:opacity-60"
+              className="min-h-[48px] rounded-full border border-ink/20 px-6 text-[0.9rem] font-semibold text-ink transition-colors hover:border-ink/40 hover:bg-ink/[0.04] disabled:opacity-60"
             >
-              {loadingMore ? 'Loading…' : 'Load older'}
+              {loadingMore ? 'Loading…' : 'Show older'}
             </button>
           </div>
         ) : null}

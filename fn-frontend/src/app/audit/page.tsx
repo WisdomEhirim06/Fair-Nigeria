@@ -6,7 +6,7 @@ import { AuditViewer } from '@/components/audit/AuditViewer';
 export const metadata: Metadata = {
   title: 'Transparency trail',
   description:
-    'A running, append-only record of every official action taken on Fair Nigeria — what happened, and when. No login required to read it.',
+    'Every result sheet uploaded, verified, and every change made to an election — written down when it happens.',
   alternates: { canonical: '/audit' },
 };
 
@@ -20,10 +20,15 @@ export default function AuditPage() {
             Transparency trail
           </p>
           <h1 className="mt-3 text-[clamp(1.75rem,5.2vw,2.9rem)] font-extrabold leading-[1.04] tracking-[-0.03em]">
-            Every action, on the record.
+            Nothing happens quietly.
           </h1>
-          <p className="mt-4 max-w-[52ch] text-[0.96rem] leading-relaxed text-muted">
-            A running record of every official action, what happened and when.
+          <p className="mt-4 max-w-[54ch] text-[0.96rem] leading-relaxed text-muted">
+            Every result sheet uploaded, verified, and every change an administrator
+            makes to an election is written down here the moment it happens.
+          </p>
+          <p className="mt-3 max-w-[54ch] text-[0.96rem] leading-relaxed text-muted">
+            You don’t need to read it. It’s here so that if anyone ever questions a number, the
+            answer can be checked rather than argued about.
           </p>
         </section>
 
