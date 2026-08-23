@@ -99,6 +99,16 @@
   transition-delay: 0.33s;
 }
 
+/* No-JS fallback: reveal scroll-animated content when JS hasn't run, so
+   crawlers and noscript users see the copy instead of an empty page. The root
+   layout removes `no-js` from <html> immediately, so JS users are unaffected. */
+html.no-js [data-reveal],
+html.no-js [data-reveal-group] > * {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 /* Nigeria dot-map — one dot per LGA, filling in on load */
 .ng-outline {
   fill: none;

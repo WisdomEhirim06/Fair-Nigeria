@@ -15,15 +15,26 @@ import { formatNumber } from '@/lib/format';
 import { FlagDialog } from './FlagDialog';
 import { SHEET_STATUS, StatusChip } from './status';
 
-export function SheetDetail() {
+type SheetDetailProps = {
+  /** Server-rendered first paint. When present, the client skips its fetches
+   *  and only handles flagging. */
+  initial?: {
+    sheet: Sheet | null;
+    result: SheetResult | null;
+    place: string;
+  };
+};
+
+export function SheetDetail({ initial }: SheetDetailProps = {}) {
   const { id } = useParams<{ id: string }>();
-  const [sheet, setSheet] = useState<Sheet | null | undefined>(undefined);
-  const [result, setResult] = useState<SheetResult | null>(null);
-  const [place, setPlace] = useState<string>('');
-  const [flagCount, setFlagCount] = useState(0);
+  const [sheet, setSheet] = useState<Sheet | null | undefined>(initial?.sheet);
+  const [result, setResult] = useState<SheetResult | null>(initial?.result ?? null);
+  const [place, setPlace] = useState<string>(initial?.place ?? '');
+  const [flagCount, setFlagCount] = useState(initial?.sheet?.flagCount ?? 0);
   const [flagOpen, setFlagOpen] = useState(false);
 
   useEffect(() => {
+    if (initial) return;
     let active = true;
     void (async () => {
       const s = await getSheet(id).catch(() => null);
@@ -49,7 +60,7 @@ export function SheetDetail() {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, initial]);
 
   if (sheet === undefined) {
     return (

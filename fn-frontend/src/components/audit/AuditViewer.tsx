@@ -108,20 +108,34 @@ function clock(iso: string) {
   return new Date(iso).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
 }
 
-export function AuditViewer() {
+type AuditViewerProps = {
+  /** Server-rendered first page. When present the client skips its initial fetch. */
+  initialEntries?: AuditEntry[];
+};
+
+export function AuditViewer({ initialEntries }: AuditViewerProps = {}) {
   const [scope, setScope] = useState('');
 
-  const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [entries, setEntries] = useState<AuditEntry[]>(initialEntries ?? []);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialEntries);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
+  const [hasMore, setHasMore] = useState(
+    initialEntries ? initialEntries.length === LIMIT : false,
+  );
 
   // Bumped on every filter change, so a page that lands after the filter moved
   // is discarded instead of being appended to a list it doesn't belong to.
   const requestTicket = useRef(0);
+  // The server already fetched page 1; the filter effect must not refetch it on
+  // mount (that would flash the spinner back over the seeded list).
+  const skippedInitialFetch = useRef(false);
 
   useEffect(() => {
+    if (initialEntries && !skippedInitialFetch.current) {
+      skippedInitialFetch.current = true;
+      return;
+    }
     const ticket = ++requestTicket.current;
     setLoading(true);
     void (async () => {
@@ -204,7 +218,10 @@ export function AuditViewer() {
         ) : (
           groups.map((group) => (
             <div key={group.day} className="mb-8">
-              <p className="mb-4 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted">
+              <p
+                suppressHydrationWarning
+                className="mb-4 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted"
+              >
                 {group.day}
               </p>
               <div className="grid grid-cols-[auto_1fr] gap-x-4">
@@ -221,7 +238,9 @@ export function AuditViewer() {
                     <div className="pb-6">
                       <p className="text-[0.98rem] leading-relaxed">{describe(e)}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[0.8rem] text-muted">
-                        <span className="font-mono">{clock(e.createdAt)}</span>
+                        <span className="font-mono" suppressHydrationWarning>
+                          {clock(e.createdAt)}
+                        </span>
                         {/* The id builds the link but is never shown. */}
                         {e.entityType === 'sheet' && e.entityId ? (
                           <a

@@ -22,25 +22,35 @@ const STATUS_OPTIONS: { value: SheetStatus | ''; label: string }[] = [
   { value: 'disputed', label: 'Disputed' },
 ];
 
-export function SheetsBrowser() {
-  const [states, setStates] = useState<StateOption[]>([]);
+type SheetsBrowserProps = {
+  /** Server-rendered first page + state list. When present the client skips its
+   *  initial fetches and only refetches on filter changes / "show more". */
+  initial?: { states: StateOption[]; sheets: Sheet[] };
+};
+
+export function SheetsBrowser({ initial }: SheetsBrowserProps = {}) {
+  const [states, setStates] = useState<StateOption[]>(initial?.states ?? []);
   const [lgas, setLgas] = useState<Lga[]>([]);
   const [stateId, setStateId] = useState('');
   const [lgaId, setLgaId] = useState('');
   const [status, setStatus] = useState<SheetStatus | ''>('');
 
-  const [sheets, setSheets] = useState<Sheet[]>([]);
+  const [sheets, setSheets] = useState<Sheet[]>(initial?.sheets ?? []);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initial);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
+  const [hasMore, setHasMore] = useState(initial ? initial.sheets.length === LIMIT : false);
 
   // Bumped on every filter change. A response whose ticket is stale is thrown
   // away, so a page that arrives after the filters moved can't be appended to
   // a list it doesn't belong to.
   const requestTicket = useRef(0);
+  // The server already fetched page 1; the filter effect must not refetch it on
+  // mount (that would flash the spinner back over the seeded grid).
+  const skippedInitialFetch = useRef(false);
 
   useEffect(() => {
+    if (initial) return;
     void listStates()
       .then(setStates)
       .catch(() => setStates([]));
@@ -60,6 +70,10 @@ export function SheetsBrowser() {
 
   // Reload from the first page whenever a filter changes.
   useEffect(() => {
+    if (initial && !skippedInitialFetch.current) {
+      skippedInitialFetch.current = true;
+      return;
+    }
     const ticket = ++requestTicket.current;
     setLoading(true);
     void (async () => {

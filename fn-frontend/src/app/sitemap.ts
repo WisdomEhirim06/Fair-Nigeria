@@ -7,17 +7,32 @@ import { absoluteUrl } from '@/lib/seo/site';
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
+  const articles = await listArticlesServer();
+
+  // Most recently published/updated article — a stable lastmod for the routes
+  // whose freshness actually tracks content, instead of churning on every regen.
+  const latestArticle = articles.reduce<Date | null>((latest, a) => {
+    const d = new Date(a.updatedAt ?? a.publishedAt ?? a.createdAt);
+    return !latest || d > latest ? d : latest;
+  }, null);
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: absoluteUrl('/'), lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: absoluteUrl('/results'), lastModified: now, changeFrequency: 'hourly', priority: 0.9 },
-    { url: absoluteUrl('/sheets'), lastModified: now, changeFrequency: 'hourly', priority: 0.8 },
-    { url: absoluteUrl('/articles'), lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
-    { url: absoluteUrl('/audit'), lastModified: now, changeFrequency: 'daily', priority: 0.6 },
+    {
+      url: absoluteUrl('/'),
+      changeFrequency: 'weekly',
+      priority: 1,
+      ...(latestArticle ? { lastModified: latestArticle } : {}),
+    },
+    { url: absoluteUrl('/results'), changeFrequency: 'hourly', priority: 0.9 },
+    { url: absoluteUrl('/sheets'), changeFrequency: 'hourly', priority: 0.8 },
+    {
+      url: absoluteUrl('/articles'),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+      ...(latestArticle ? { lastModified: latestArticle } : {}),
+    },
+    { url: absoluteUrl('/audit'), changeFrequency: 'daily', priority: 0.6 },
   ];
-
-  const articles = await listArticlesServer();
 
   const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
     url: absoluteUrl(`/articles/${article.slug}`),

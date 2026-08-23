@@ -61,6 +61,22 @@ export default async function ArticlePage({ params }: Props) {
           mainEntityOfPage: { '@type': 'WebPage', '@id': url },
           // Points at the Organization declared once in the root layout.
           publisher: { '@id': `${SITE_URL}/#organization` },
+          author: { '@id': `${SITE_URL}/#organization` },
+        }}
+      />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Civic library',
+              item: absoluteUrl('/articles'),
+            },
+            { '@type': 'ListItem', position: 2, name: article.title, item: url },
+          ],
         }}
       />
       <ArticleView article={article} />

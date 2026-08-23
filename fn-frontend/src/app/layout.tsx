@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  alternates: { canonical: '/' },
+  alternates: { canonical: absoluteUrl('/') },
   openGraph: {
     title: `${SITE_NAME} | Citizen-led electoral transparency`,
     description: SITE_DESCRIPTION,
@@ -104,6 +104,8 @@ const siteGraph = {
         height: 192,
       },
       areaServed: { '@type': 'Country', name: 'Nigeria' },
+      // Live social profiles (Facebook, X, Instagram) when they exist.
+      sameAs: [],
     },
     {
       '@type': 'WebSite',
@@ -119,8 +121,13 @@ const siteGraph = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+    <html lang="en-NG" className={`no-js ${display.variable} ${mono.variable}`}>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.remove('no-js');",
+          }}
+        />
         <JsonLd data={siteGraph} />
         <a href="#main" className="skip-link">
           Skip to content

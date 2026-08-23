@@ -5,11 +5,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { listArticles, type ArticleCategory, type ArticleSummary } from '@/lib/api';
 import { CATEGORY_ORDER, categoryLabel } from './categories';
 
-export function PublicLibrary() {
-  const [articles, setArticles] = useState<ArticleSummary[] | null>(null);
+type PublicLibraryProps = {
+  /** Server-rendered list. When present the client skips its own fetch. */
+  initialArticles?: ArticleSummary[];
+};
+
+export function PublicLibrary({ initialArticles }: PublicLibraryProps = {}) {
+  const [articles, setArticles] = useState<ArticleSummary[] | null>(initialArticles ?? null);
   const [active, setActive] = useState<ArticleCategory | 'all'>('all');
 
   useEffect(() => {
+    if (initialArticles) return;
     void listArticles()
       .then(setArticles)
       .catch(() => setArticles([]));

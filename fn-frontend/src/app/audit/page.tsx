@@ -2,16 +2,23 @@ import type { Metadata } from 'next';
 
 import { PageChrome } from '@/components/app/PageChrome';
 import { AuditViewer } from '@/components/audit/AuditViewer';
+import { listAuditServer } from '@/lib/api/public-server';
+import { absoluteUrl } from '@/lib/seo/site';
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Transparency trail',
   description:
     'Every result sheet uploaded, verified, and every change made to an election — written down when it happens.',
-  alternates: { canonical: '/audit' },
+  alternates: { canonical: absoluteUrl('/audit') },
 };
 
-// Public, append-only transparency trail. No login required.
-export default function AuditPage() {
+// Public, append-only transparency trail. No login required. The first page is
+// server-rendered; "Show older" and scope filters stay client-side.
+export default async function AuditPage() {
+  const entries = await listAuditServer({ page: 1, limit: 25 });
+
   return (
     <PageChrome>
       <div className="mx-auto w-full max-w-[720px] px-6 pb-20">
@@ -33,7 +40,7 @@ export default function AuditPage() {
         </section>
 
         <div className="mt-9">
-          <AuditViewer />
+          <AuditViewer initialEntries={entries} />
         </div>
       </div>
     </PageChrome>

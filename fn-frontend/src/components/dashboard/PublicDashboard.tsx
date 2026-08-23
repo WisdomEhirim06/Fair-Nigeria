@@ -56,17 +56,54 @@ function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
   );
 }
 
-export function PublicDashboard() {
-  const [election, setElection] = useState<Election | null | undefined>(undefined);
-  const [results, setResults] = useState<ResultsDashboard | null | undefined>(undefined);
-  const [ratings, setRatings] = useState<RatingsDashboard | null | undefined>(undefined);
-  const [stateId, setStateId] = useState('');
-  const [now, setNow] = useState(() => Date.now());
+type PublicDashboardProps = {
+  /** Server-rendered first paint. When present, the client skips the initial
+   *  fetch and only polls the two dashboards going forward. */
+  initialData?: {
+    election: Election | null;
+    results: ResultsDashboard | null;
+    ratings: RatingsDashboard | null;
+  };
+};
 
-  // Load the election once, then poll both dashboards every 60s.
+export function PublicDashboard({ initialData }: PublicDashboardProps = {}) {
+  const [election, setElection] = useState<Election | null | undefined>(initialData?.election);
+  const [results, setResults] = useState<ResultsDashboard | null | undefined>(
+    initialData?.results,
+  );
+  const [ratings, setRatings] = useState<RatingsDashboard | null | undefined>(
+    initialData?.ratings,
+  );
+  const [stateId, setStateId] = useState('');
+  // Starts at 0 so the server and the client's first paint agree ("just now"),
+  // then snap to real time on mount to keep the relative label accurate.
+  const [now, setNow] = useState(0);
+
+  // Load the election once, then poll both dashboards every 60s. With server
+  // seed data we skip the initial fetch and go straight to polling.
   useEffect(() => {
     let active = true;
     let timer: ReturnType<typeof setInterval> | undefined;
+
+    if (initialData) {
+      if (initialData.election) {
+        const poll = async () => {
+          const [r, rt] = await Promise.all([
+            getResultsDashboard(initialData.election!.id).catch(() => null),
+            getRatingsDashboard(initialData.election!.id).catch(() => null),
+          ]);
+          if (!active) return;
+          setResults(r);
+          setRatings(rt);
+        };
+        timer = setInterval(() => void poll(), 60_000);
+      }
+      return () => {
+        active = false;
+        if (timer) clearInterval(timer);
+      };
+    }
+
     void (async () => {
       const e = await getCurrentElection().catch(() => null);
       if (!active) return;
@@ -96,6 +133,7 @@ export function PublicDashboard() {
 
   // Keep the "updated X ago" label fresh between fetches.
   useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 30_000);
     return () => clearInterval(t);
   }, []);
