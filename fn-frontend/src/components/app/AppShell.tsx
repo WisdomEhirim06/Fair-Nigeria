@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { navFor, roleLabel } from '@/lib/auth/roles';
 import { useSession } from '@/lib/session/SessionProvider';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -17,10 +18,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-6 px-5 md:px-8">
           <div className="flex items-center gap-9">
-            <span className="flex items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+            <a href="/" className="flex items-center gap-2.5">
+              <BrandLogo size="sm" />
               <span className="text-[0.98rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
-            </span>
+            </a>
 
             {/*
               One nav at every width. With the trail moved to the footer each

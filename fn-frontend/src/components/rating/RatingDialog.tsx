@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 
 import type { Election } from '@/lib/api';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 import { RatingFlow } from './RatingFlow';
 
 
@@ -26,15 +27,15 @@ export function RatingDialog({ election, onClose }: { election: Election; onClos
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-screen w-full flex-col overflow-hidden bg-cream sm:max-h-[92vh] sm:max-w-[520px] sm:rounded-3xl sm:shadow-[0_30px_80px_rgba(15,31,23,0.3)]"
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label="Rate the election"
+        className="relative flex max-h-screen w-full flex-col overflow-hidden bg-cream sm:max-h-[92vh] sm:max-w-[520px] sm:rounded-3xl sm:shadow-[0_30px_80px_rgba(15,31,23,0.3)]"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
-          <span className="flex items-center gap-2 text-[0.95rem] font-bold">
-            <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+          <span className="flex items-center gap-2.5 text-[0.95rem] font-bold">
+            <BrandLogo size="xs" />
             Fair Nigeria
           </span>
           <button

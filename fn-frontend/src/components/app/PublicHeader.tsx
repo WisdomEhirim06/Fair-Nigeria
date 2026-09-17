@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 const LINKS = [
   { href: '/results', label: 'Results' },
@@ -18,7 +19,7 @@ export function PublicHeader() {
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-4 px-5 md:px-8">
         <a href="/" className="flex shrink-0 items-center gap-2.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+          <BrandLogo size="sm" />
           <span className="text-[0.98rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
         </a>
 

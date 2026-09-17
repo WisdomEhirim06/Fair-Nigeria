@@ -1,10 +1,12 @@
+import { BrandLogo } from '@/components/brand/BrandLogo';
+
 export function SiteFooter() {
   return (
     <footer className="bg-forest-deep px-6 py-[clamp(3.5rem,7vw,5.5rem)] text-[#cdd6c4] md:px-[clamp(1.5rem,7vw,7.5rem)]">
       <div className="mx-auto flex max-w-[1400px] flex-wrap items-start justify-between gap-10">
         <div className="min-w-[280px] flex-1 basis-[360px]">
-          <div className="mb-4 flex items-center gap-2.5">
-            <span className="h-3 w-3 rounded-full bg-lime" aria-hidden />
+          <div className="mb-4 flex items-center gap-3">
+            <BrandLogo size="md" />
             <span className="text-[1.18rem] font-bold text-cream">Fair Nigeria</span>
           </div>
           <p className="max-w-[44ch] leading-relaxed text-[#8fa088]">

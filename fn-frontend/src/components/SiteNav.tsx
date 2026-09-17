@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { homePathFor } from '@/lib/auth/roles';
 import { useSession } from '@/lib/session/SessionProvider';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 
 const LINKS = [
@@ -27,7 +28,7 @@ export function SiteNav() {
           href="/"
           className="flex items-center gap-2.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
         >
-          <span className="h-2.5 w-2.5 rounded-full bg-leaf" aria-hidden />
+          <BrandLogo size="sm" />
           <span className="text-[1.05rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
         </a>
 

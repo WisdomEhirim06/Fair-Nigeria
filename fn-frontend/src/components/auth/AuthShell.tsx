@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 /** Default left-panel quote for citizen screens (register + login). */
 const CITIZEN_PLEDGE = (
@@ -18,7 +19,7 @@ export function AuthShell({ children, quote }: { children: ReactNode; quote?: Re
 
       <aside className="relative hidden overflow-hidden bg-[#f2f5e8] md:flex md:flex-col md:p-12 lg:p-16">
         <a href="/" className="flex items-center gap-2.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+          <BrandLogo size="sm" />
           <span className="text-[1.05rem] font-bold text-forest">Fair Nigeria</span>
         </a>
 
@@ -34,7 +35,7 @@ export function AuthShell({ children, quote }: { children: ReactNode; quote?: Re
           viewport, which otherwise pushes it far down the screen. */}
       <section className="relative flex min-h-screen flex-col justify-start bg-cream px-6 pb-12 pt-20 sm:px-10 md:justify-center md:bg-white md:px-[clamp(2rem,5vw,5rem)] md:py-10">
         <a href="/" className="absolute left-6 top-6 flex items-center gap-2.5 sm:left-10 md:hidden">
-          <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+          <BrandLogo size="sm" />
           <span className="text-[1.02rem] font-bold">Fair Nigeria</span>
         </a>
         <div className="mx-auto w-full max-w-[420px]">{children}</div>

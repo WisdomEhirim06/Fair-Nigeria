@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { useSession } from '@/lib/session/SessionProvider';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 import { AdminIcon, type AdminIconName } from './AdminIcons';
 
 interface Item {
@@ -56,7 +57,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </svg>
         </button>
         <span className="flex items-center gap-2 text-[0.95rem] font-bold">
-          <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+          <BrandLogo size="xs" />
           Admin
         </span>
         <span className="w-9" aria-hidden />
@@ -94,7 +95,7 @@ function SidebarContent({
   return (
     <>
       <a href="/admin" onClick={onNavigate} className="mb-8 flex items-center gap-2.5 px-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-lime" aria-hidden />
+        <BrandLogo size="sm" />
         <span className="text-[1.02rem] font-bold tracking-[-0.01em]">Fair Nigeria</span>
       </a>
 

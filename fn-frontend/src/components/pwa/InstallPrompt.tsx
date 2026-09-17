@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -22,7 +23,7 @@ export function InstallPrompt() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem(DISMISSED_KEY)) return;
+    if (typeof window !== 'undefined' && localStorage.getItem(DISMISSED_KEY)) return;
 
     const onPrompt = (e: Event) => {
       // Take control of when this is shown rather than letting the browser pick.
@@ -65,9 +66,7 @@ export function InstallPrompt() {
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:inset-x-auto md:bottom-5 md:right-5 md:p-0">
       <div className="pointer-events-auto w-full max-w-[420px] rounded-2xl border border-ink/12 bg-white p-5 shadow-[0_18px_44px_rgba(15,31,23,0.16)] md:w-[380px]">
         <div className="flex items-start gap-3.5">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-forest-deep">
-            <span className="h-4 w-4 rounded-full bg-lime" aria-hidden />
-          </span>
+          <BrandLogo size="lg" className="rounded-xl shadow-sm" />
           <div className="min-w-0 flex-1">
             <p className="text-[0.95rem] font-bold tracking-[-0.01em]">Install Fair Nigeria</p>
             <p className="mt-1 text-[0.85rem] leading-relaxed text-muted">
