@@ -6,7 +6,7 @@ const API_CACHE = `fn-api-${CACHE_VERSION}`;
 const OWNED_CACHES = [STATIC_CACHE, PAGES_CACHE, API_CACHE];
 
 const OFFLINE_URL = '/offline.html';
-const PRECACHE = [OFFLINE_URL, '/icons/icon.svg', '/manifest.webmanifest'];
+const PRECACHE = [OFFLINE_URL, '/icons/icon.svg', '/fn-logo.png', '/manifest.webmanifest'];
 
 const MAX_PAGES = 40;
 const MAX_API_ENTRIES = 80;
@@ -34,6 +34,9 @@ function isStaticAsset(url) {
   return (
     url.pathname.startsWith('/_next/static/') ||
     url.pathname.startsWith('/icons/') ||
+    url.pathname === '/fn-logo.png' ||
+    url.pathname === '/fn-logo-transparent.png' ||
+    url.pathname === '/apple-touch-icon.png' ||
     url.pathname === '/manifest.webmanifest'
   );
 }
